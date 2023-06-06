@@ -1,0 +1,9 @@
+{
+  "devDependencies": {
+    "sass": "^1.62.1"
+  },
+  "dependencies": {
+    "react-helmet": "^6.1.0",
+    "reactstrap-date-picker": "^1.0.9"
+  }
+}
