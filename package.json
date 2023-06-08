@@ -3,7 +3,11 @@
     "sass": "^1.62.1"
   },
   "dependencies": {
+    "classnames": "^2.3.2",
+    "framer-motion": "^10.12.16",
     "react-helmet": "^6.1.0",
+    "react-hook-form": "^7.44.3",
+    "react-icons": "^4.9.0",
     "reactstrap-date-picker": "^1.0.9"
   }
 }

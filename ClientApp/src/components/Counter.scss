@@ -18,3 +18,7 @@
 input[type = 'file'] {
     color: rgba(0,0,0,0)
 }
+.AddFormerAddress1, .AddFormerAddress2 {
+    text-decoration: underline dotted;
+    cursor: pointer;
+}

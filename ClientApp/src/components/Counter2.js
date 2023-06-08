@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import './Counter.scss';
 import { Form, Row, FormGroup, Col, Label, Legend, Input, Button } from 'reactstrap';
 import { Helmet } from 'react-helmet';
@@ -6,18 +6,19 @@ import { DatePicker } from 'reactstrap-date-picker';
 
 
 
-export const Counter = () => {
-    const [bldgInfo, setBldgInfo] = useState('');
+export function Counter() {
+    const inputRef = useRef();
+    const [inputValue, setInputValue] = useState('');
     const [state, setState] = useState({
 
-        /*Housing/ Property Provider Information
+         /*Housing/ Property Provider Information
 
 */      companyName: '',
         agentFirstname: '',
         agentLastname: '',
         housingProviderEmail: '',
         bldgSite: '',
-
+        bldgInfo: '',
         bldgStreetAddress: '',
         bldgCityAddress: '',
         bldgStateAddress: '',
@@ -39,13 +40,14 @@ export const Counter = () => {
         sincnd: '',
 
 
-        /*Applicant Personal Information*/
+        /*app Personal Information*/
         appCurrentAddress: '',
         appCurrentStreetAddress: '',
         appCurrentCityAddress: '',
         appCurrentProvinceState: '',
         appCurrentPostalStateAddress: '',
         appCurrentCountryAddress: '',
+        numMonthStay: '',
         appMoveInDate: '',
         HousingProviderName: '',
         HousingProviderEmail: '',
@@ -116,34 +118,79 @@ export const Counter = () => {
         scriptLoaded: false,
         stylesLoaded: false,
 
+        /*Hide/Show Former Address*/
+        showAddress1: false,
+        showAddress2: false,
+
     });
 
+    const [showFormerAddress, setShowFormerAddress] = useState(false);
+    const [showAddress1, setShowAddress1] = useState(false);
+    const [showAddress2, setShowAddress2] = useState(false);
 
 
-    /* const handleUpload = () => {
-         // Logic to handle file upload for each state variable
-         console.log('File 1:', file1);
-         console.log('File 2:', file2);
-     };*/
+
 
     const handleChange = (e) => {
-        setState({
-            ...state,
+
+        //if (state.hasOwnProperty(e.target.name)) {
+        setState((prevState) => ({
+            ...prevState,
             [e.target.name]: e.target.value,
 
+        }));
 
-        });
 
+        //}
+        const title = document.getElementById("bldgStreetAddress").value;
+        setInputValue(title);
+        e.preventDefault();
     };
-    const handleBldgInfoChange = (e) => setBldgInfo(e.target.value);
+
+    const handleSelectnumMonthsChange = (e) => {
+        setState((prevState) => ({
+            ...prevState,
+            numMonthStay: e.target.value
+        }));
+    }; useEffect(() => {
+        // Capture the value after it is populated by another callback function
 
 
-    /* const handleChangeBldgInfo = (e) => {
-         setState((prevState) => ({
-             ...prevState,
-             bldgInfo: e.target.value
-         }));
-     }*/
+        setState((prevState) => ({
+            ...prevState,
+            bldgStreetAddress: document.getElementById("bldgStreetAddress").value,
+        }));
+    }, []);
+
+    /*Toggle Add/Delete Addresses*/
+    const renderOptions = () => {
+        const options = [];
+        for (let i = 1; i <= 12; i++) {
+            options.push(<option key={i} value={i}>{i}</option>);
+        }
+        options.push(<option key="12+" value="12+">12+</option>);
+        return options;
+    };
+    /* const numMonths = Array.from({ length: 12 }, (_, index) => index + 1);*/
+
+    useEffect(() => {
+        if (state.numMonthStay >= 12 || state.numMonthStay === "12+") {
+            setShowFormerAddress(false); // show the former address1
+        } else {
+            setShowFormerAddress(true); // hide the former address1
+            setShowAddress1(false);
+        }
+    }, [state.numMonthStay]);
+
+    const addFAddress1 = (e) => {
+        e.preventDefault();
+        setShowAddress1((showAddress1) => !showAddress1); // Toggles the value of showDiv
+    };
+    const addFAddress2 = (e) => {
+        e.preventDefault();
+        setShowAddress2((showAddress2) => !showAddress2); // Toggles the value of showDiv
+    };
+
 
     //Canada Post Implementation
     const loadScript = (callback) => {
@@ -198,10 +245,6 @@ export const Counter = () => {
             }));
         })
 
-
-
-        // Similarly, update stylesLoaded
-
         //return () => {
         // document.head.removeChild(this.script);
         // document.head.removeChild(this.link);
@@ -218,13 +261,20 @@ export const Counter = () => {
             {
                 element: "bldgStreetAddress",
                 field: "Line1",
-                mode: window.pca.fieldMode ? window.pca.fieldMode.POPULATE : null
+                mode: window.pca.fieldMode ? window.pca.fieldMode.POPULATE : null,
+                /*onChange: (value) => {
+                    setState((prevState) => ({
+                        ...prevState,
+                        bldgStateAddress: document.getElementById("bldgStreetAddrss").value,
+                    }));
+                   
+                },*/
             },
-            {
+            /*{
                 element: "street-address2",
                 field: "Line2",
                 mode: window.pca.fieldMode ? window.pca.fieldMode.POPULATE : null
-            },
+            },*/
             {
                 element: "bldgCityAddress",
                 field: "City",
@@ -325,18 +375,18 @@ export const Counter = () => {
                 field: "Line1",
                 mode: window.pca.fieldMode ? window.pca.fieldMode.POPULATE : null
             },
-            /*{
+            {
                 element: "street-address2",
                 field: "Line2",
                 mode: window.pca.fieldMode ? window.pca.fieldMode.POPULATE : null
-            },*/
+            },
             {
                 element: "appFormerCityAddress1",
                 field: "City",
                 mode: window.pca.fieldMode ? window.pca.fieldMode.POPULATE : null
             },
             {
-                element: "appFormerProvinceState1",
+                element: "appFormerProvinceStateAddress1",
                 field: "ProvinceName",
                 mode: window.pca.fieldMode ? window.pca.fieldMode.POPULATE : null
             },
@@ -463,7 +513,6 @@ export const Counter = () => {
     }
 
 
-    //Uploading Files Handlers
     const changeHandlerPayStub = (event) => {
         const file = event.target.files[0];
         setState(prevState => {
@@ -504,6 +553,8 @@ export const Counter = () => {
             }
         });
     };
+
+
 
 
 
@@ -585,7 +636,7 @@ export const Counter = () => {
     useEffect(() => {
         setInputFilter(
             document.getElementById("sincnd"),
-            (value) => value === null || /^[\d-*\s]*$/.test(value),   //accepts null,*,-
+            (value) => value === null || /^[\d-*\s]*$/.test(value),
             "Must be a number"
         );
     }, [])
@@ -625,13 +676,20 @@ export const Counter = () => {
     /*File Upload*/
 
 
+    const handleSubmission = () => {
+        // eslint-disable-next-line no-undef
+
+        // eslint-disable-next-line no-undef
+
+    };
 
 
     const handleSubmit = (e) => {
 
         e.preventDefault();
-        alert("hey");
+
         //Property Information
+        setInputValue(document.getElementById("bldgStreetAddress").value);
         console.log('CompanyName:', state.companyName);
         console.log('Name:', state.agentFirstname);
         console.log('LastName:', state.agentLastname);
@@ -639,6 +697,7 @@ export const Counter = () => {
         console.log('bldgSite:', state.bldgSite);
         console.log('bldgInfo:', state.bldgInfo);
         console.log('bldgStreet:', state.bldgStreetAddress);
+        console.log('bldgStreetInputRef:', inputValue);
         console.log('bldgCity:', state.bldgCityAddress);
         console.log('bldgState:', state.bldgStateAddress);
         console.log('bldgPostal:', state.bldgPostCodeAddress);
@@ -659,11 +718,6 @@ export const Counter = () => {
 
         //app
         console.log('appCurrentAddress:', state.appCurrentAddress);
-        console.log('appMoveInDate:', state.appCurrentStreetAddress);
-        console.log('appMoveInDate:', state.appCurrentCityAddress);
-        console.log('appMoveInDate:', state.appCurrentProvinceState);
-        console.log('appMoveInDate:', state.appCurrentPostalStateAddress);
-        console.log('appMoveInDate:', state.appCurrentCountryAddress);
         console.log('appMoveInDate:', state.appMoveInDate);
         console.log('HousingProviderName:', state.HousingProviderName);
         console.log('HousingProviderEmail:', state.HousingProviderEmail);
@@ -672,11 +726,7 @@ export const Counter = () => {
 
 
         console.log('appFormerAddress1', state.appFormerAddress1);
-        console.log('appFormerAddress1', state.appFormerStreetAddress1);
-        console.log('appFormerAddress1', state.appFormerCityAddress1);
-        console.log('appFormerAddress1', state.appFormerProvinceState1);
-        console.log('appFormerAddress1', state.appFormerPostalStateAddress1);
-        console.log('appFormerAddress1', state.appFormerCountryAddress1);
+        console.log('numMonthStay', state.numMonthStay);
         console.log('appFormerMoveInDate1:', state.appFormerMoveInDate1);
         console.log('appFormerMoveOutDate1:', state.appFormerMoveOutDate1);
         console.log('FormerHousingProviderName1:', state.FormerHousingProviderName1);
@@ -686,11 +736,6 @@ export const Counter = () => {
 
 
         console.log('appFormerAddress2:', state.appFormerAddress2);
-        console.log('appFormerAddress2:', state.appFormerStreetAddress2);
-        console.log('appFormerAddress2:', state.appFormerCityAddress2);
-        console.log('appFormerAddress2:', state.appFormerProvinceState2);
-        console.log('appFormerAddress2:', state.appFormerPostalStateAddress2);
-        console.log('appFormerAddress2:', state.appFormerCountryAddress2);
         console.log('appFormerMoveInDate2:', state.appFormerMoveInDate2);
         console.log('appFormerMoveOutDate2:', state.appFormerMoveOutDate2);
         console.log('FormerHousingProviderName2:', state.FormerHousingProviderName2);
@@ -699,11 +744,6 @@ export const Counter = () => {
         console.log('FormerHousingProviderMobilePhone2:', state.FormerHousingProviderMobilePhone2);
 
         console.log('appFormerAddress3:', state.appFormerAddress3);
-        console.log('appFormerAddress3:', state.appFormerStreetAddress3);
-        console.log('appFormerAddress3:', state.appFormerCityAddress3);
-        console.log('appFormerAddress3:', state.appFormerProvinceState3);
-        console.log('appFormerAddress3:', state.appFormerPostalStateAddress3);
-        console.log('appFormerAddress3:', state.appFormerCountryAddress3);
         console.log('appFormerMoveInDate3:', state.appFormerMoveInDate3);
         console.log('appFormerMoveOutDate3:', state.appFormerMoveOutDate3);
         console.log('FormerHousingProviderName3:', state.FormerHousingProviderName3);
@@ -848,15 +888,14 @@ export const Counter = () => {
                                 id="bldgSite"
                                 name="bldgSite"
                                 value={state.bldgSite}
-                                placeholder="Start typing your street address or postal code..."
+                                placeholder="Apartment, studio, or floor"
                                 type="text"
                                 onChange={handleChange}
-                                className="inputbldgSite"
+                                className="inputBuildingSite"
                             />
                         </Col>
 
                     </FormGroup>
-
                     <FormGroup row>
 
                         <Col md={4}>
@@ -865,6 +904,8 @@ export const Counter = () => {
                             </Label>
                             <Input
                                 id="bldgStreetAddress"
+
+                                ref={inputRef}
                                 name="bldgStreetAddress"
                                 placeholder=""
                                 type="text"
@@ -977,9 +1018,10 @@ export const Counter = () => {
                         </Col>
                     </FormGroup>
 
+
                     <FormGroup row>
                         <Label
-                            for="bldgInfo"
+                            for="buildingInfo"
 
                             md={4}
                         >
@@ -987,13 +1029,12 @@ export const Counter = () => {
                         </Label>
                         <Col md={8}>
                             <Input
-                                id="bldgInfo"
-                                name="bldgInfo"
-                                value={bldgInfo}
-                                className="inputbldgInfo"
-                                onChange={handleBldgInfoChange}
+                                id="buildingInfo"
+                                name="buildingInfo"
+                                value={state.buildingInfo}
+                                className="inputbuildingInfo"
                                 type="select"
-
+                                onChange={handleChange}
 
                             >
                                 <option>
@@ -1018,19 +1059,19 @@ export const Counter = () => {
 
                     <FormGroup row>
 
-                        <Label for="bldgAddress" className="bldgAddress" md={2} >
+                        <Label for="buildingAddress" className="buildingAddress" md={2} >
                             Address
                         </Label>
 
                         <Col md={10}>
                             <Input
-                                id="bldgAddress"
-                                name="bldgAddress"
-                                value={state.bldgAddress}
-                                placeholder="bldg Site Address"
+                                id="buildingAddress"
+                                name="buildingAddress"
+                                value={state.buildingAddress}
+                                placeholder="Building Site Address"
                                 type="text"
                                 onChange={handleChange}
-                                className="inputbldgAddress"
+                                className="inputBuildingAddress"
                             />
                         </Col>
 
@@ -1268,7 +1309,7 @@ export const Counter = () => {
                     <h4 className="infoMarkers">Part III: Residence(s) Information</h4>
                     <br />
                     <h6><strong>Current Address</strong></h6>
-                    <p className="currentAddressHeader"><span className="currentAddressHeader">*</span>Applicant's Current Address</p>
+                    <p className="currentAddressHeader"><span className="astCurrentAddress">*</span>Applicant's Current Address</p>
                     <Input
                         id="appCurrentAddress"
                         name="appCurrentAddress"
@@ -1278,6 +1319,8 @@ export const Counter = () => {
                         //onChange={handleChange}
                         className="inputAppCurrentAddress"
                     />
+
+                    <br />
                     <FormGroup row>
 
                         <Col md={4}>
@@ -1362,23 +1405,43 @@ export const Counter = () => {
                         </Col>
 
                     </FormGroup>
-                    <br />
                     <FormGroup row>
-                        <Col md={4}>
+                        <Col md={2}>
                             <Label
-                                for="appMoveInDate: "
+                                for="applicantMoveInDate: "
+                            >
+                                No of Months:
+                            </Label>
+                            <Input
+                                id="numMonthStay"
+                                name="numMonthStay"
+                                value={state.numMonthStay}
+                                type="select"
+                                onChange={handleSelectnumMonthsChange}
+                            >
+                                {/*{numMonths.map((number) => (
+                                    <option key={number} value={number}>{number}</option>
+                                ))}*/}
+                                {renderOptions()}
+                            </Input>
+
+
+                        </Col>
+                        <Col md={3}>
+                            <Label
+                                for="applicantMoveInDate: "
                             >
                                 Move in Month/Year:
                             </Label>
 
                             <Input
-                                id="appMoveInDate"
-                                name="appMoveInDate"
-                                value={state.appMoveInDate}
+                                id="applicantMoveInDate"
+                                name="applicantMoveInDate"
+                                value={state.applicantMoveInDate}
                                 placeholder="MM / YY"
                                 type="text"
                                 onChange={handleChange}
-                                className="inputappMoveInDate"
+                                className="inputApplicantMoveInDate"
                             />
 
                         </Col>
@@ -1397,7 +1460,7 @@ export const Counter = () => {
                                 className="inputHousingProviderName"
                             />
                         </Col>
-                        <Col md={4}>
+                        <Col md={3}>
                             <Label for="HousingProviderEmail" className="HousingProviderEmail" >
                                 Housing Provider Email Address:
                             </Label>
@@ -1414,670 +1477,699 @@ export const Counter = () => {
                     </FormGroup>
                 </div>
 
-                <div>
-                    <p className="appFormerAddress1"><strong>Former Address 1</strong></p>
-                    <Input
-                        id="appFormerAddress1"
-                        name="appFormerAddress1"
-                        //value={state.appFormerAddress1}
-                        placeholder="with a placeholder"
-                        type="text"
-                        // onChange={handleChange}
-                        className="inputappFormerAddress1"
-                    />
-                    <br />
-                    <FormGroup row>
-
-                        <Col md={4}>
-                            <Label for="appFormerStreetAddress1" className="appFormerStreetAddress1" >
-                                Street:
-                            </Label>
-                            <Input
-                                id="appFormerStreetAddress1"
-                                name="appFormerStreetAddress1"
-                                placeholder=""
-                                type="text"
-                                value={state.appFormerStreetAddress1}
-                                onChange={handleChange}
-                                className="inputappFormerStreetAddress1"
-                            />
-
-
-                        </Col>
-
-                        <Col md={2}>
-                            <Label for="appFormerCityAddress1" className="appFormerCityAddress1" >
-                                City:
-                            </Label>
-                            <Input
-                                id="appFormerCityAddress1"
-                                name="appFormerCityAddress1"
-                                placeholder=""
-                                type="text"
-                                onChange={handleChange}
-                                value={state.appFormerCityAddress1}
-
-                                className="inputappFormerCityAddress1"
-                            />
-
-
-                        </Col>
-
-
-                        <Col md={2}>
-                            <Label for="appFormerProvinceState1" className="appFormerProvinceState1" >
-                                Province/State:
-                            </Label>
-                            <Input
-                                id="appFormerProvinceState1"
-                                name="appFormerProvinceState1"
-                                placeholder=""
-                                type="text"
-                                value={state.appFormerProvinceState1}
-                                onChange={handleChange}
-                                className="inputappFormerProvinceState1"
-                            />
-
-
-                        </Col>
-                        <Col md={2}>
-                            <Label for="appFormerPostalStateAddress1" className="appFormerPostalStateAddress1" >
-                                Postal Code:
-                            </Label>
-                            <Input
-                                id="appFormerPostalStateAddress1"
-                                name="appFormerPostalStateAddress1"
-                                placeholder=""
-                                type="text"
-                                value={state.appFormerPostalStateAddress1}
-                                onChange={handleChange}
-                                className="inputappFormerPostalStateAddress1"
-                            />
-
-                        </Col>
-                        <Col md={2}>
-                            <Label for="appFormerCountryAddress1" className="appFormerCountryAddress1" >
-                                Country:
-                            </Label>
-                            <Input
-                                id="appFormerCountryAddress1"
-                                name="appFormerCountryAddress1"
-                                placeholder=""
-                                type="text"
-                                value={state.appFormerCountryAddress1}
-                                onChange={handleChange}
-                                className="inputappFormerCountryAddress1"
-                            />
-
-                        </Col>
-
-                    </FormGroup>
-                    <FormGroup row>
-                        <Col md={3}>
-                            <Label
-                                for="appMoveInDate1"
-                            >
-                                Move In Month/Year:
-                            </Label>
-
-                            <Input
-                                id="appMoveInDate1"
-                                name="appMoveInDate1"
-                                value={state.appMoveInDate1}
-                                placeholder="MM / YY"
-                                type="text"
-                                onChange={handleChange}
-                                className="inputappMoveInDate1"
-                            />
-
-                        </Col>
-                        <Col md={3}>
-                            <Label
-                                for="appFormerMoveOutDate1"
-                            >
-                                Move Out  Month/Year:
-                            </Label>
-
-                            <Input
-                                id="appFormerMoveOutDate1"
-                                name="appFormerMoveOutDate1"
-                                value={state.appFormerMoveOutDate1}
-                                placeholder="MM / YY"
-                                type="text"
-                                onChange={handleChange}
-                                className="inputappFormerMoveOutDate1"
-                            />
-
-                        </Col>
-
-                        <Col md={3}>
-                            <Label for="FormerHousingProviderName1" className="FormerHousingProviderName1" >
-                                Housing Provider Name:
-                            </Label>
-                            <Input
-                                id="FormerHousingProviderName1"
-                                name="FormerHousingProviderName1"
-                                placeholder=""
-                                type="text"
-                                value={state.FormerHousingProviderName1}
-                                onChange={handleChange}
-                                className="inputFormerHousingProviderName1"
-                            />
-                        </Col>
-                        <Col md={3}>
-                            <Label for="HousingProviderEmail" className="FormerHousingProviderEmail1" >
-                                Housing Provider Email Address:
-                            </Label>
-                            <Input
-                                id="FormerHousingProviderEmail1"
-                                name="FormerHousingProviderEmail1"
-                                placeholder=""
-                                type="email"
-                                value={state.FormerHousingProviderEmail1}
-                                onChange={handleChange}
-                                className="inputFormerHousingProviderEmail1"
-                            />
-                        </Col>
-                    </FormGroup>
-
-                </div>
-                <div>
-                    <p className="appFormerAddress2"><strong>Former Address 2</strong></p>
-                    <Input
-                        id="appFormerAddress2"
-                        name="appFormerAddress2"
-                        //value={state.appFormerAddress2}
-                        placeholder="with a placeholder"
-                        type="text"
-                        //onChange={handleChange}
-                        className="inputappFormerAddress2"
-                    />
-                    <br />
-                    <FormGroup row>
-
-                        <Col md={4}>
-                            <Label for="appFormerStreetAddress2" className="appFormerStreetAddress2" >
-                                Street:
-                            </Label>
-                            <Input
-                                id="appFormerStreetAddress2"
-                                name="appFormerStreetAddress2"
-                                placeholder=""
-                                type="text"
-                                value={state.appFormerStreetAddress2}
-                                onChange={handleChange}
-                                className="inputappFormerStreetAddress2"
-                            />
-
-
-                        </Col>
-
-                        <Col md={2}>
-                            <Label for="appFormerCityAddress2" className="appFormerCityAddress2" >
-                                City:
-                            </Label>
-                            <Input
-                                id="appFormerCityAddress2"
-                                name="appFormerCityAddress2"
-                                placeholder=""
-                                type="text"
-                                onChange={handleChange}
-                                value={state.appFormerCityAddress2}
-
-                                className="inputappFormerCityAddress2"
-                            />
-
-
-                        </Col>
-
-
-                        <Col md={2}>
-                            <Label for="appFormerProvinceState2" className="appFormerProvinceState2" >
-                                Province/State:
-                            </Label>
-                            <Input
-                                id="appFormerProvinceState2"
-                                name="appFormerProvinceState2"
-                                placeholder=""
-                                type="text"
-                                value={state.appFormerProvinceState2}
-                                onChange={handleChange}
-                                className="inputappFormerProvinceState2"
-                            />
-
-
-                        </Col>
-                        <Col md={2}>
-                            <Label for="appFormerPostalStateAddress2" className="appFormerPostalStateAddress2" >
-                                Postal Code:
-                            </Label>
-                            <Input
-                                id="appFormerPostalStateAddress2"
-                                name="appFormerPostalStateAddress2"
-                                placeholder=""
-                                type="text"
-                                value={state.appFormerPostalStateAddress2}
-                                onChange={handleChange}
-                                className="inputappFormerPostalStateAddress2"
-                            />
-
-                        </Col>
-                        <Col md={2}>
-                            <Label for="appFormerCountryAddress2" className="appFormerCountryAddress2" >
-                                Country:
-                            </Label>
-                            <Input
-                                id="appFormerCountryAddress2"
-                                name="appFormerCountryAddress2"
-                                placeholder=""
-                                type="text"
-                                value={state.appFormerCountryAddress2}
-                                onChange={handleChange}
-                                className="inputappFormerCountryAddress2"
-                            />
-
-                        </Col>
-
-                    </FormGroup>
-                    <FormGroup row>
-                        <Col md={3}>
-                            <Label
-                                for="appMoveInDate2"
-                            >
-                                Move In Month/Year:
-                            </Label>
-
-                            <Input
-                                id="appMoveInDate2"
-                                name="appMoveInDate2"
-                                value={state.appMoveInDate2}
-                                placeholder="MM / YY"
-                                type="text"
-                                onChange={handleChange}
-                                className="inputappMoveInDate2"
-                            />
-
-                        </Col>
-                        <Col md={3}>
-                            <Label
-                                for="appFormerMoveOutDate2"
-                            >
-                                Move Out  Month/Year:
-                            </Label>
-
-                            <Input
-                                id="appFormerMoveOutDate2"
-                                name="appFormerMoveOutDate2"
-                                value={state.appFormerMoveOutDate2}
-                                placeholder="MM / YY"
-                                type="text"
-                                onChange={handleChange}
-                                className="inputappFormerMoveOutDate2"
-                            />
-
-                        </Col>
-
-                        <Col md={3}>
-                            <Label for="FormerHousingProviderName2" className="FormerHousingProviderName2" >
-                                Housing Provider Name:
-                            </Label>
-                            <Input
-                                id="FormerHousingProviderName2"
-                                name="FormerHousingProviderName2"
-                                placeholder=""
-                                type="text"
-                                value={state.FormerHousingProviderName2}
-                                onChange={handleChange}
-                                className="inputFormerHousingProviderName2"
-                            />
-                        </Col>
-                        <Col md={3}>
-                            <Label for="HousingProviderEmail2" className="FormerHousingProviderEmail2" >
-                                Housing Provider Email Address:
-                            </Label>
-                            <Input
-                                id="FormerHousingProviderEmail2"
-                                name="FormerHousingProviderEmail2"
-                                placeholder=""
-                                type="email"
-                                value={state.FormerHousingProviderEmail2}
-                                onChange={handleChange}
-                                className="inputFormerHousingProviderEmail2"
-                            />
-                        </Col>
-                    </FormGroup>
-
-                </div>
-
-                <div>
-                    <p className="appFormerAddress1"><strong>Former Address 3</strong></p>
-                    <Input
-                        id="appFormerAddress3"
-                        name="appFormerAddress3"
-                        //value={state.appFormerAddress3}
-                        placeholder="with a placeholder"
-                        type="text"
-                        //onChange={handleChange}
-                        className="inputappFormerAddress3"
-                    />
-                    <br />
-                    <FormGroup row>
-
-                        <Col md={4}>
-                            <Label for="appFormerStreetAddress3" className="appFormerStreetAddress3" >
-                                Street:
-                            </Label>
-                            <Input
-                                id="appFormerStreetAddress3"
-                                name="appFormerStreetAddress3"
-                                placeholder=""
-                                type="text"
-                                value={state.appFormerStreetAddress3}
-                                onChange={handleChange}
-                                className="inputappFormerStreetAddress3"
-                            />
-
-
-                        </Col>
-
-                        <Col md={2}>
-                            <Label for="appFormerCityAddress3" className="appFormerCityAddress3" >
-                                City:
-                            </Label>
-                            <Input
-                                id="appFormerCityAddress3"
-                                name="appFormerCityAddress3"
-                                placeholder=""
-                                type="text"
-                                onChange={handleChange}
-                                value={state.appFormerCityAddress3}
-
-                                className="inputappFormerCityAddress3"
-                            />
-
-
-                        </Col>
-
-
-                        <Col md={2}>
-                            <Label for="appFormerProvinceState3" className="appFormerProvinceState3" >
-                                Province/State:
-                            </Label>
-                            <Input
-                                id="appFormerProvinceState3"
-                                name="appFormerProvinceState3"
-                                placeholder=""
-                                type="text"
-                                value={state.appFormerProvinceState1}
-                                onChange={handleChange}
-                                className="inputappFormerProvinceState3"
-                            />
-
-
-                        </Col>
-                        <Col md={2}>
-                            <Label for="appFormerPostalStateAddress3" className="appFormerPostalStateAddress3" >
-                                Postal Code:
-                            </Label>
-                            <Input
-                                id="appFormerPostalStateAddress3"
-                                name="appFormerPostalStateAddress3"
-                                placeholder=""
-                                type="text"
-                                value={state.appFormerPostalStateAddress3}
-                                onChange={handleChange}
-                                className="inputappFormerPostalStateAddress3"
-                            />
-
-                        </Col>
-                        <Col md={2}>
-                            <Label for="appFormerCountryAddress3" className="appFormerCountryAddress3" >
-                                Country:
-                            </Label>
-                            <Input
-                                id="appFormerCountryAddress3"
-                                name="appFormerCountryAddress3"
-                                placeholder=""
-                                type="text"
-                                value={state.appFormerCountryAddress3}
-                                onChange={handleChange}
-                                className="inputappFormerCountryAddress3"
-                            />
-
-                        </Col>
-
-                    </FormGroup>
-                    <FormGroup row>
-                        <Col md={3}>
-                            <Label
-                                for="appMoveInDate3"
-                            >
-                                Move In Month/Year:
-                            </Label>
-
-                            <Input
-                                id="appMoveInDate3"
-                                name="appMoveInDate3"
-                                value={state.appMoveInDate3}
-                                placeholder="MM / YY"
-                                type="text"
-                                onChange={handleChange}
-                                className="inputappMoveInDate3"
-                            />
-
-                        </Col>
-                        <Col md={3}>
-                            <Label
-                                for="appFormerMoveOutDate3"
-                            >
-                                Move Out  Month/Year:
-                            </Label>
-
-                            <Input
-                                id="appFormerMoveOutDate3"
-                                name="appFormerMoveOutDate3"
-                                value={state.appFormerMoveOutDate3}
-                                placeholder="MM / YY"
-                                type="text"
-                                onChange={handleChange}
-                                className="inputappFormerMoveOutDate3"
-                            />
-
-                        </Col>
-
-                        <Col md={3}>
-                            <Label for="FormerHousingProviderName3" className="FormerHousingProviderName3" >
-                                Housing Provider Name:
-                            </Label>
-                            <Input
-                                id="FormerHousingProviderName3"
-                                name="FormerHousingProviderName3"
-                                placeholder=""
-                                type="text"
-                                value={state.FormerHousingProviderName3}
-                                onChange={handleChange}
-                                className="inputFormerHousingProviderName3"
-                            />
-                        </Col>
-                        <Col md={3}>
-                            <Label for="HousingProviderEmail3" className="FormerHousingProviderEmail3" >
-                                Housing Provider Email Address:
-                            </Label>
-                            <Input
-                                id="FormerHousingProviderEmail3"
-                                name="FormerHousingProviderEmail3"
-                                placeholder=""
-                                type="email"
-                                value={state.FormerHousingProviderEmail3}
-                                onChange={handleChange}
-                                className="inputFormerHousingProviderEmail3"
-                            />
-                        </Col>
-                    </FormGroup>
-
-                </div>
-                <div>
-                    <h4 className="infoMarkers">Part IV: Employment/ Income Sources</h4>
-                    <br />
-                    <h6><strong>Current Employment Information</strong></h6>
-
-
-                    <br />
-                    <FormGroup row>
-
-                        <Col md={3}>
-                            <Label
-                                for="lengthEmployment"
-                            >
-                                Lenght of Employment:
-                            </Label>
-
-                            <Input
-                                id="lengthEmployment"
-                                name="lengthEmployment"
-                                value={state.lengthEmployment}
-                                placeholder=""
-                                type="text"
-                                onChange={handleChange}
-                                className="inputLengthEmployment"
-                            />
-
-                        </Col>
+                {showFormerAddress
+                    &&
+                    <div>
+
+                        <p className="appFormerAddress1"><strong>Former Address 1</strong></p>
+                        <Input
+                            id="appFormerAddress1"
+                            name="appFormerAddress1"
+                            //value={state.appFormerAddress1}
+                            placeholder="with a placeholder"
+                            type="text"
+                            // onChange={handleChange}
+                            className="inputappFormerAddress1"
+                        />
                         <br />
-                        <Col md={{
-                            offset: 4,
-                            size: 5
-                        }}>
-                            <Label for="incomeSource" className="incomeSource" >
-                                Income Source:
-                            </Label>
-                            <Input
-                                id="incomeSource"
-                                name="incomeSource"
-                                placeholder="Employment/Freelance/Business"
-                                type="text"
-                                value={state.incomeSource}
-                                onChange={handleChange}
-                                className="incomeSource"
-                            />
-                        </Col>
-                        <br />
+                        <FormGroup row>
 
-                    </FormGroup>
-                    <FormGroup row>
+                            <Col md={4}>
+                                <Label for="appFormerStreetAddress1" className="appFormerStreetAddress1" >
+                                    Street:
+                                </Label>
+                                <Input
+                                    id="appFormerStreetAddress1"
+                                    name="appFormerStreetAddress1"
+                                    placeholder=""
+                                    type="text"
+                                    value={state.appFormerStreetAddress1}
+                                    onChange={handleChange}
+                                    className="inputappFormerStreetAddress1"
+                                    required
+                                />
 
 
-                        <Col md={4}>
-                            <Label for="employerCompanyName" className="employerCompanyName" >
-                                Employer/Company Name:
-                            </Label>
-                            <Input
-                                id="employerCompanyName"
-                                name="employerCompanyName"
-                                placeholder=""
-                                type="text"
-                                value={state.employerCompanyName}
-                                onChange={handleChange}
-                                className="inputemployerCompanyName"
-                            />
-                        </Col>
-                        <Col md={4}>
-                            <Label for="employerContactName" className="employerContactName" >
-                                Contact Name:
-                            </Label>
-                            <Input
-                                id="employerContactName"
-                                name="employerContactName"
-                                placeholder=""
-                                type="text"
-                                value={state.employerContactName}
-                                onChange={handleChange}
-                                className="employerContactName"
-                            />
-                        </Col>
-                        <Col md={4}>
-                            <Label for="employerContactPhone" className="employerContactPhone" >
-                                Contact Phone:
-                            </Label>
-                            <Input
-                                id="employerContactPhone"
-                                name="employerContactPhone"
-                                placeholder=""
-                                type="text"
-                                value={state.employerContactPhone}
-                                onChange={handleChange}
-                                className="inputEmployerContactPhone"
-                            />
-                        </Col>
-                    </FormGroup>
+                            </Col>
+
+                            <Col md={2}>
+                                <Label for="appFormerCityAddress1" className="appFormerCityAddress1" >
+                                    City:
+                                </Label>
+                                <Input
+                                    id="appFormerCityAddress1"
+                                    name="appFormerCityAddress1"
+                                    placeholder=""
+                                    type="text"
+                                    onChange={handleChange}
+                                    value={state.appFormerCityAddress1}
+                                    className="inputappFormerCityAddress1"
+                                    required
+                                />
 
 
-                    <FormGroup row>
+                            </Col>
 
-                        <Col md={2}>
-                            <Label for="employeeField" className="employeeField" >
-                                Field:
-                            </Label>
-                            <Input
-                                id="employeeField"
-                                name="employeeField"
-                                placeholder=""
-                                type="text"
-                                value={state.employeeField}
-                                onChange={handleChange}
-                                className="inputEmployeeField"
-                            />
-                        </Col>
-                        <Col md={3}>
-                            <Label for="employeePosition" className="employeePosition" >
-                                Position:
-                            </Label>
-                            <Input
-                                id="employeePosition"
-                                name="employeePosition"
-                                placeholder=""
-                                type="text"
-                                value={state.employeePosition}
-                                onChange={handleChange}
-                                className="inputEmployeePosition"
-                            />
-                        </Col>
-                        <Col md={3}>
-                            <Label for="employmentMonthlyGross" className="employmentMonthlyGross" >
-                                Monthly Gross Income:
-                            </Label>
-                            <Input
-                                id="employmentMonthlyGross"
-                                name="employmentMonthlyGross"
-                                placeholder="$"
-                                type="text"
-                                value={state.employmentMonthlyGross}
-                                onChange={handleChange}
-                                className="inputEmploymentMonthlyGross"
-                            />
-                        </Col>
-                        <Col md={4}>
-                            <Label for="otherSourceMonthlyGross" className="otherSourceMonthlyGross" >
-                                Monthly income from Other Sources:
-                            </Label>
-                            <Input
-                                id="otherSourceMonthlyGross"
-                                name="otherSourceMonthlyGross"
-                                placeholder="$"
-                                type="text"
-                                value={state.otherSourceMonthlyGross}
-                                onChange={handleChange}
-                                className="inputOtherSourceMonthlyGross"
-                            />
-                        </Col>
-                    </FormGroup>
 
+                            <Col md={2}>
+                                <Label for="appFormerProvinceState1" className="appFormerProvinceState1" >
+                                    Province/State:
+                                </Label>
+                                <Input
+                                    id="appFormerProvinceState1"
+                                    name="appFormerProvinceState1"
+                                    placeholder=""
+                                    type="text"
+                                    value={state.appFormerProvinceState1}
+                                    onChange={handleChange}
+                                    className="inputappFormerProvinceState1"
+                                    required
+                                />
+
+
+                            </Col>
+                            <Col md={2}>
+                                <Label for="appFormerPostalStateAddress1" className="appFormerPostalStateAddress1" >
+                                    Postal Code:
+                                </Label>
+                                <Input
+                                    id="appFormerPostalStateAddress1"
+                                    name="appFormerPostalStateAddress1"
+                                    placeholder=""
+                                    type="text"
+                                    value={state.appFormerPostalStateAddress1}
+                                    onChange={handleChange}
+                                    className="inputappFormerPostalStateAddress1"
+                                    required
+                                />
+
+                            </Col>
+                            <Col md={2}>
+                                <Label for="appFormerCountryAddress1" className="appFormerCountryAddress1" >
+                                    Country:
+                                </Label>
+                                <Input
+                                    id="appFormerCountryAddress1"
+                                    name="appFormerCountryAddress1"
+                                    placeholder=""
+                                    type="text"
+                                    value={state.appFormerCountryAddress1}
+                                    onChange={handleChange}
+                                    className="inputappFormerCountryAddress1"
+                                    required
+                                />
+
+                            </Col>
+
+                        </FormGroup>
+                        <FormGroup row>
+                            <Col md={3}>
+                                <Label
+                                    for="appMoveInDate1"
+                                >
+                                    Move In Month/Year:
+                                </Label>
+
+                                <Input
+                                    id="appMoveInDate1"
+                                    name="appMoveInDate1"
+                                    value={state.appMoveInDate1}
+                                    placeholder="MM / YY"
+                                    type="text"
+                                    onChange={handleChange}
+                                    className="inputappMoveInDate1"
+                                />
+
+                            </Col>
+                            <Col md={3}>
+                                <Label
+                                    for="appFormerMoveOutDate1"
+                                >
+                                    Move Out  Month/Year:
+                                </Label>
+
+                                <Input
+                                    id="appFormerMoveOutDate1"
+                                    name="appFormerMoveOutDate1"
+                                    value={state.appFormerMoveOutDate1}
+                                    placeholder="MM / YY"
+                                    type="text"
+                                    onChange={handleChange}
+                                    className="inputappFormerMoveOutDate1"
+                                />
+
+                            </Col>
+
+                            <Col md={3}>
+                                <Label for="FormerHousingProviderName1" className="FormerHousingProviderName1" >
+                                    Housing Provider Name:
+                                </Label>
+                                <Input
+                                    id="FormerHousingProviderName1"
+                                    name="FormerHousingProviderName1"
+                                    placeholder=""
+                                    type="text"
+                                    value={state.FormerHousingProviderName1}
+                                    onChange={handleChange}
+                                    className="inputFormerHousingProviderName1"
+                                />
+                            </Col>
+                            <Col md={3}>
+                                <Label for="HousingProviderEmail" className="FormerHousingProviderEmail1" >
+                                    Housing Provider Email Address:
+                                </Label>
+                                <Input
+                                    id="FormerHousingProviderEmail1"
+                                    name="FormerHousingProviderEmail1"
+                                    placeholder=""
+                                    type="email"
+                                    value={state.FormerHousingProviderEmail1}
+                                    onChange={handleChange}
+                                    className="inputFormerHousingProviderEmail1"
+                                />
+                            </Col>
+                        </FormGroup>
+
+                    </div>
+
+                }
+                {!showAddress1 && <p className="AddFormerAddress1" onClick={addFAddress1}>+ Add more address</p>} {/*Tae*/}
+                <div>
+
+
+
+                    {showAddress1 &&
+                        <div>
+                            <p className="AddFormerAddress1" onClick={addFAddress1}>- Delete address</p>
+                            <p className="appFormerAddress2"><strong>Former Address 2</strong></p>
+                            <Input
+                                id="appFormerAddress2"
+                                name="appFormerAddress2"
+                                //value={state.appFormerAddress2}
+                                placeholder="with a placeholder"
+                                type="text"
+                                //onChange={handleChange}
+                                className="inputappFormerAddress2"
+                            />
+                            <br />
+                            <FormGroup row>
+
+                                <Col md={4}>
+                                    <Label for="appFormerStreetAddress2" className="appFormerStreetAddress2" >
+                                        Street:
+                                    </Label>
+                                    <Input
+                                        id="appFormerStreetAddress2"
+                                        name="appFormerStreetAddress2"
+                                        placeholder=""
+                                        type="text"
+                                        value={state.appFormerStreetAddress2}
+                                        onChange={handleChange}
+                                        className="inputappFormerStreetAddress2"
+                                    />
+
+
+                                </Col>
+
+                                <Col md={2}>
+                                    <Label for="appFormerCityAddress2" className="appFormerCityAddress2" >
+                                        City:
+                                    </Label>
+                                    <Input
+                                        id="appFormerCityAddress2"
+                                        name="appFormerCityAddress2"
+                                        placeholder=""
+                                        type="text"
+                                        onChange={handleChange}
+                                        value={state.appFormerCityAddress2}
+
+                                        className="inputappFormerCityAddress2"
+                                    />
+
+
+                                </Col>
+
+
+                                <Col md={2}>
+                                    <Label for="appFormerProvinceState2" className="appFormerProvinceState2" >
+                                        Province/State:
+                                    </Label>
+                                    <Input
+                                        id="appFormerProvinceState2"
+                                        name="appFormerProvinceState2"
+                                        placeholder=""
+                                        type="text"
+                                        value={state.appFormerProvinceState2}
+                                        onChange={handleChange}
+                                        className="inputappFormerProvinceState2"
+                                    />
+
+
+                                </Col>
+                                <Col md={2}>
+                                    <Label for="appFormerPostalStateAddress2" className="appFormerPostalStateAddress2" >
+                                        Postal Code:
+                                    </Label>
+                                    <Input
+                                        id="appFormerPostalStateAddress2"
+                                        name="appFormerPostalStateAddress2"
+                                        placeholder=""
+                                        type="text"
+                                        value={state.appFormerPostalStateAddress2}
+                                        onChange={handleChange}
+                                        className="inputappFormerPostalStateAddress2"
+                                    />
+
+                                </Col>
+                                <Col md={2}>
+                                    <Label for="appFormerCountryAddress2" className="appFormerCountryAddress2" >
+                                        Country:
+                                    </Label>
+                                    <Input
+                                        id="appFormerCountryAddress2"
+                                        name="appFormerCountryAddress2"
+                                        placeholder=""
+                                        type="text"
+                                        value={state.appFormerCountryAddress2}
+                                        onChange={handleChange}
+                                        className="inputappFormerCountryAddress2"
+                                    />
+
+                                </Col>
+
+                            </FormGroup>
+                            <FormGroup row>
+                                <Col md={3}>
+                                    <Label
+                                        for="appMoveInDate2"
+                                    >
+                                        Move In Month/Year:
+                                    </Label>
+
+                                    <Input
+                                        id="appMoveInDate2"
+                                        name="appMoveInDate2"
+                                        value={state.appMoveInDate2}
+                                        placeholder="MM / YY"
+                                        type="text"
+                                        onChange={handleChange}
+                                        className="inputappMoveInDate2"
+                                    />
+
+                                </Col>
+                                <Col md={3}>
+                                    <Label
+                                        for="appFormerMoveOutDate2"
+                                    >
+                                        Move Out  Month/Year:
+                                    </Label>
+
+                                    <Input
+                                        id="appFormerMoveOutDate2"
+                                        name="appFormerMoveOutDate2"
+                                        value={state.appFormerMoveOutDate2}
+                                        placeholder="MM / YY"
+                                        type="text"
+                                        onChange={handleChange}
+                                        className="inputappFormerMoveOutDate2"
+                                    />
+
+                                </Col>
+
+                                <Col md={3}>
+                                    <Label for="FormerHousingProviderName2" className="FormerHousingProviderName2" >
+                                        Housing Provider Name:
+                                    </Label>
+                                    <Input
+                                        id="FormerHousingProviderName2"
+                                        name="FormerHousingProviderName2"
+                                        placeholder=""
+                                        type="text"
+                                        value={state.FormerHousingProviderName2}
+                                        onChange={handleChange}
+                                        className="inputFormerHousingProviderName2"
+                                    />
+                                </Col>
+                                <Col md={3}>
+                                    <Label for="HousingProviderEmail2" className="FormerHousingProviderEmail2" >
+                                        Housing Provider Email Address:
+                                    </Label>
+                                    <Input
+                                        id="FormerHousingProviderEmail2"
+                                        name="FormerHousingProviderEmail2"
+                                        placeholder=""
+                                        type="email"
+                                        value={state.FormerHousingProviderEmail2}
+                                        onChange={handleChange}
+                                        className="inputFormerHousingProviderEmail2"
+                                    />
+                                </Col>
+                            </FormGroup>
+                            {!showAddress2 &&
+                                <p className="AddFormerAddress2" onClick={addFAddress2}>+ Add more address</p>
+                            }
+
+                        </div>
+                    }
                 </div>
+
+
+                {showAddress2 &&
+
+                    <div>
+                        <div>
+                            <p className="AddFormerAddress1" onClick={addFAddress2}>- Delete address</p>
+                            <p className="appFormerAddress3"><strong>Former Address 3</strong></p>
+                            <Input
+                                id="appFormerAddress3"
+                                name="appFormerAddress3"
+                                //value={state.appFormerAddress3}
+                                placeholder="with a placeholder"
+                                type="text"
+                                //onChange={handleChange}
+                                className="inputappFormerAddress3"
+                            />
+                            <br />
+                            <FormGroup row>
+
+                                <Col md={4}>
+                                    <Label for="appFormerStreetAddress3" className="appFormerStreetAddress3" >
+                                        Street:
+                                    </Label>
+                                    <Input
+                                        id="appFormerStreetAddress3"
+                                        name="appFormerStreetAddress3"
+                                        placeholder=""
+                                        type="text"
+                                        value={state.appFormerStreetAddress3}
+                                        onChange={handleChange}
+                                        className="inputappFormerStreetAddress3"
+                                    />
+
+
+                                </Col>
+
+                                <Col md={2}>
+                                    <Label for="appFormerCityAddress3" className="appFormerCityAddress3" >
+                                        City:
+                                    </Label>
+                                    <Input
+                                        id="appFormerCityAddress3"
+                                        name="appFormerCityAddress3"
+                                        placeholder=""
+                                        type="text"
+                                        onChange={handleChange}
+                                        value={state.appFormerCityAddress3}
+
+                                        className="inputappFormerCityAddress3"
+                                    />
+
+
+                                </Col>
+
+
+                                <Col md={2}>
+                                    <Label for="appFormerProvinceState3" className="appFormerProvinceState3" >
+                                        Province/State:
+                                    </Label>
+                                    <Input
+                                        id="appFormerProvinceState3"
+                                        name="appFormerProvinceState3"
+                                        placeholder=""
+                                        type="text"
+                                        value={state.appFormerProvinceState1}
+                                        onChange={handleChange}
+                                        className="inputappFormerProvinceState3"
+                                    />
+
+
+                                </Col>
+                                <Col md={2}>
+                                    <Label for="appFormerPostalStateAddress3" className="appFormerPostalStateAddress3" >
+                                        Postal Code:
+                                    </Label>
+                                    <Input
+                                        id="appFormerPostalStateAddress3"
+                                        name="appFormerPostalStateAddress3"
+                                        placeholder=""
+                                        type="text"
+                                        value={state.appFormerPostalStateAddress3}
+                                        onChange={handleChange}
+                                        className="inputappFormerPostalStateAddress3"
+                                    />
+
+                                </Col>
+                                <Col md={2}>
+                                    <Label for="appFormerCountryAddress3" className="appFormerCountryAddress3" >
+                                        Country:
+                                    </Label>
+                                    <Input
+                                        id="appFormerCountryAddress3"
+                                        name="appFormerCountryAddress3"
+                                        placeholder=""
+                                        type="text"
+                                        value={state.appFormerCountryAddress3}
+                                        onChange={handleChange}
+                                        className="inputappFormerCountryAddress3"
+                                    />
+
+                                </Col>
+
+                            </FormGroup>
+                            <FormGroup row>
+                                <Col md={3}>
+                                    <Label
+                                        for="applicantMoveInDate3"
+                                    >
+                                        Move In Month/Year:
+                                    </Label>
+
+                                    <Input
+                                        id="applicantMoveInDate3"
+                                        name="applicantMoveInDate3"
+                                        value={state.applicantMoveInDate3}
+                                        placeholder="MM / YY"
+                                        type="text"
+                                        onChange={handleChange}
+                                        className="inputApplicantMoveInDate3"
+                                    />
+
+                                </Col>
+                                <Col md={3}>
+                                    <Label
+                                        for="applicantFormerMoveOutDate3"
+                                    >
+                                        Move Out  Month/Year:
+                                    </Label>
+
+                                    <Input
+                                        id="applicantFormerMoveOutDate3"
+                                        name="applicantFormerMoveOutDate3"
+                                        value={state.applicantFormerMoveOutDate3}
+                                        placeholder="MM / YY"
+                                        type="text"
+                                        onChange={handleChange}
+                                        className="inputapplicantFormerMoveOutDate3"
+                                    />
+
+                                </Col>
+
+                                <Col md={3}>
+                                    <Label for="FormerHousingProviderName3" className="FormerHousingProviderName3" >
+                                        Housing Provider Name:
+                                    </Label>
+                                    <Input
+                                        id="FormerHousingProviderName3"
+                                        name="FormerHousingProviderName3"
+                                        placeholder=""
+                                        type="text"
+                                        value={state.FormerHousingProviderName3}
+                                        onChange={handleChange}
+                                        className="inputFormerHousingProviderName3"
+                                    />
+                                </Col>
+                                <Col md={3}>
+                                    <Label for="HousingProviderEmail3" className="FormerHousingProviderEmail3" >
+                                        Housing Provider Email Address:
+                                    </Label>
+                                    <Input
+                                        id="FormerHousingProviderEmail3"
+                                        name="FormerHousingProviderEmail3"
+                                        placeholder=""
+                                        type="email"
+                                        value={state.FormerHousingProviderEmail3}
+                                        onChange={handleChange}
+                                        className="inputFormerHousingProviderEmail3"
+                                    />
+                                </Col>
+                            </FormGroup>
+
+                        </div>
+                        <div>
+                            <h4 className="infoMarkers">Part IV: Employment/ Income Sources</h4>
+                            <br />
+                            <h6><strong>Current Employment Information</strong></h6>
+
+
+                            <br />
+                            <FormGroup row>
+
+                                <Col md={3}>
+                                    <Label
+                                        for="lengthEmployment"
+                                    >
+                                        Lenght of Employment:
+                                    </Label>
+
+                                    <Input
+                                        id="lengthEmployment"
+                                        name="lengthEmployment"
+                                        value={state.lengthEmployment}
+                                        placeholder=""
+                                        type="text"
+                                        onChange={handleChange}
+                                        className="inputLengthEmployment"
+                                    />
+
+                                </Col>
+                                <br />
+                                <Col md={{
+                                    offset: 4,
+                                    size: 5
+                                }}>
+                                    <Label for="incomeSource" className="incomeSource" >
+                                        Income Source:
+                                    </Label>
+                                    <Input
+                                        id="incomeSource"
+                                        name="incomeSource"
+                                        placeholder="Employment/Freelance/Business"
+                                        type="text"
+                                        value={state.incomeSource}
+                                        onChange={handleChange}
+                                        className="incomeSource"
+                                    />
+                                </Col>
+                                <br />
+
+                            </FormGroup>
+                            <FormGroup row>
+
+
+                                <Col md={4}>
+                                    <Label for="employerCompanyName" className="employerCompanyName" >
+                                        Employer/Company Name:
+                                    </Label>
+                                    <Input
+                                        id="employerCompanyName"
+                                        name="employerCompanyName"
+                                        placeholder=""
+                                        type="text"
+                                        value={state.employerCompanyName}
+                                        onChange={handleChange}
+                                        className="inputemployerCompanyName"
+                                        required
+                                    />
+                                </Col>
+                                <Col md={4}>
+                                    <Label for="employerContactName" className="employerContactName" >
+                                        Contact Name:
+                                    </Label>
+                                    <Input
+                                        id="employerContactName"
+                                        name="employerContactName"
+                                        placeholder=""
+                                        type="text"
+                                        value={state.employerContactName}
+                                        onChange={handleChange}
+                                        className="employerContactName"
+                                    />
+                                </Col>
+                                <Col md={4}>
+                                    <Label for="employerContactPhone" className="employerContactPhone" >
+                                        Contact Phone:
+                                    </Label>
+                                    <Input
+                                        id="employerContactPhone"
+                                        name="employerContactPhone"
+                                        placeholder=""
+                                        type="text"
+                                        value={state.employerContactPhone}
+                                        onChange={handleChange}
+                                        className="inputEmployerContactPhone"
+                                    />
+                                </Col>
+                            </FormGroup>
+
+
+                            <FormGroup row>
+
+                                <Col md={2}>
+                                    <Label for="employeeField" className="employeeField" >
+                                        Field:
+                                    </Label>
+                                    <Input
+                                        id="employeeField"
+                                        name="employeeField"
+                                        placeholder=""
+                                        type="text"
+                                        value={state.employeeField}
+                                        onChange={handleChange}
+                                        className="inputEmployeeField"
+                                    />
+                                </Col>
+                                <Col md={3}>
+                                    <Label for="employeePosition" className="employeePosition" >
+                                        Position:
+                                    </Label>
+                                    <Input
+                                        id="employeePosition"
+                                        name="employeePosition"
+                                        placeholder=""
+                                        type="text"
+                                        value={state.employeePosition}
+                                        onChange={handleChange}
+                                        className="inputEmployeePosition"
+                                    />
+                                </Col>
+                                <Col md={3}>
+                                    <Label for="employmentMonthlyGross" className="employmentMonthlyGross" >
+                                        Monthly Gross Income:
+                                    </Label>
+                                    <Input
+                                        id="employmentMonthlyGross"
+                                        name="employmentMonthlyGross"
+                                        placeholder="$"
+                                        type="text"
+                                        value={state.employmentMonthlyGross}
+                                        onChange={handleChange}
+                                        className="inputEmploymentMonthlyGross"
+                                    />
+                                </Col>
+                                <Col md={4}>
+                                    <Label for="otherSourceMonthlyGross" className="otherSourceMonthlyGross" >
+                                        Monthly income from Other Sources:
+                                    </Label>
+                                    <Input
+                                        id="otherSourceMonthlyGross"
+                                        name="otherSourceMonthlyGross"
+                                        placeholder="$"
+                                        type="text"
+                                        value={state.otherSourceMonthlyGross}
+                                        onChange={handleChange}
+                                        className="inputOtherSourceMonthlyGross"
+                                    />
+                                </Col>
+
+                            </FormGroup>
+
+                        </div>
+                    </div>}
 
                 <br />
 
                 <div>
-                    <h4 className="infoMarkers">Part V: Document Uplaod</h4>
+                    <h4 className="infoMarkers">Part V: Document Upload</h4>
 
                     <br />
                     <FormGroup row>
@@ -2094,10 +2186,10 @@ export const Counter = () => {
                                 value={state.payStubFile && state.payStubFile.name}   //conditional rendering syntax ensure that value is only rendered when payStubFile is truthy (i.e., not null or undefined). 
                                 //This way, you avoid trying to access the name property of a non-existent object.
                                 onChange={handleChange}
+
                                 className="inputpayStubFile"
                             />
                             <input type="file" id="payStubFile" onChange={changeHandlerPayStub} />
-
 
                         </Col>
 
@@ -2156,7 +2248,6 @@ export const Counter = () => {
 
                 </div>
 
-
                 <Button onSubmit={handleSubmit}>
                     Submit
                 </Button>
@@ -2165,8 +2256,6 @@ export const Counter = () => {
 
             </Form>
             <br />
-
-
 
 
 
