@@ -6,6 +6,7 @@ import { DatePicker } from 'reactstrap-date-picker';
 
 
 
+
 export function Counter() {
     const inputRef = useRef();
     const [inputValue, setInputValue] = useState('');
@@ -124,7 +125,7 @@ export function Counter() {
         showAddress2: false,
 
     });
-    const [formErrors, setFormErrors] = useState('');
+    const [errors, setErrors] = useState({});
     const [showFormerAddress, setShowFormerAddress] = useState(false);
     const [showAddress, setShowAddress] = useState(false);
     const [showAddress1, setShowAddress1] = useState(false);
@@ -134,20 +135,24 @@ export function Counter() {
 
 
     const handleChange = (e) => {
-
+       
         //if (state.hasOwnProperty(e.target.name)) {
         setState((prevState) => ({
             ...prevState,
             [e.target.name]: e.target.value,
 
         }));
+     
 
-
+       
         /*//}
         const title = document.getElementById("bldgStreetAddress").value;
         setInputValue(title);
         e.preventDefault();*/
+        validateField(e.target.name, e.target.value);
     };
+
+
     const handleUpdateState = () => {
         const newValue = inputRef.current.value;
         setState((prevState) => ({
@@ -156,6 +161,45 @@ export function Counter() {
 
         }));
     }
+    //Required Field Validation
+    const handleBlur = (e) => {
+        const { name, value } = e.target;
+        validateField(name, value);
+    };
+
+    const validateField = (name, value) => {
+        let errorMessage = null;
+
+        if (state.hasOwnProperty(name)) {
+            if (name === 'housingProviderEmail') {
+                errorMessage = validateRequired(value);
+                if (!errorMessage) {
+                    errorMessage = validateEmail(value); // Additional validation for email format
+                }
+            } else {
+                errorMessage = validateRequired(value);
+            }
+
+            setErrors((prevErrors) => ({
+                ...prevErrors,
+                [name]: errorMessage,
+            }));
+        }
+};
+
+    const validateRequired = (value) => {
+        if (value.trim() === '') {
+            return 'This field is required';
+        }
+        return null;
+    };
+    const validateEmail = (value) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(value)) {
+            return 'Invalid email format';
+        }
+        return null;
+    };
 
 
     const handleSelectnumMonthsChange = (e) => {
@@ -532,7 +576,54 @@ export function Counter() {
         /*-- End of Address Complete on Former Address 3 -- */
     }
 
+    
+   /* const validateField = (fieldName, value) => {
+        const errorMessage = validateRequired(value);
+        setErrors((prevErrors) => ({
+            ...prevErrors,
+            [fieldName]: errorMessage,
+        }));
+    };
 
+    const validateRequired = (value) => {
+        if (state.companyName.trim() === '') {
+            return 'This field is required';
+        }
+        return null;
+    };
+    const validateForm = () => {
+        let isValid = true;
+        const newErrors = {};
+        
+        // Validate companyName
+        if (state.companyName.trim() === '') {
+            newErrors.companyName = 'This field is required';
+            isValid = false;
+        }
+
+        // Validate agentFirstname
+        if (state.agentFirstname.trim() === '') {
+            newErrors.agentFirstname = 'This field is required';
+            isValid = false;
+        }
+        if (state.agentLastname.trim() === '') {
+            newErrors.agentLastname = 'This field is required';
+            isValid = false;
+        }
+
+        // Add validations for other fields
+        // Validate companyName
+       
+
+       *//* // Validate agentFirstname
+        if (state.agentFirstname.trim() === '') {
+            newErrors.agentFirstname = 'Agent first name is required';
+            isValid = false;
+        }*//*
+        setErrors(newErrors);
+        return isValid;
+    };
+*/
     const changeHandlerPayStub = (event) => {
         const file = event.target.files[0];
         setState(prevState => {
@@ -704,19 +795,60 @@ export function Counter() {
 
 
     const handleSubmit = (e) => {
-
+        //const emailRegex = /@/;
         e.preventDefault();
-        if (state.companyName === '') {
+        /*if (state.companyName === '') {
             setFormErrors("Field needs to be filled");
         } else {
-            setFormErrors(null);
-           
-        }
-        
+            setFormErrors(null);           
+        }*/
+        /*if (!emailRegex.test(state.tenantEmail)) {
+            setFormErrors("Should contain '@' symbol ");
+        } else {
+            setFormErrors(null); 
 
-        // Proceed with form submission only if there are no errors
+        }*/
         
-            //Property Information
+        // Proceed with form submission only if there are no errors
+        /*const isValid = validateForm();
+
+        if (isValid) {
+            // Form is valid, proceed with submission
+
+            // Here, you can perform the desired action, such as sending the form data to an API or updating the database.
+            // For example, you can display an alert message
+            alert("Hey, form submitted successfully!");
+
+            // Reset the form after submission
+            setState({
+                Housing/ Property Provider Information
+                companyName: '',
+                agentFirstname: '',
+                agentLastname: '',
+                housingProviderEmail: '',
+                bldgSite: '',
+                bldgInfo: '',
+                bldgStreetAddress: '',
+                bldgCityAddress: '',
+                bldgStateAddress: '',
+                bldgPostCodeAddress: '',
+                bldgMultiUnitAddress: '',
+                bldgResidentialBusinessAddress: '',
+                bldgAddress: '',
+                leaseTerm: '',
+                dateValue: '',
+                sendFreeReport: '',
+            });
+
+            // Clear the errors
+            setErrors({});
+        } else {
+            // Form is invalid, handle the errors or display error messages
+            // For example, you can console.log the errors or update the UI with error messages
+            console.log(errors);
+        }*/
+          
+           /* //Property Information
             setInputValue(document.getElementById("bldgStreetAddress").value);
             console.log(inputRef);
             console.log('CompanyName:', state.companyName);
@@ -790,7 +922,7 @@ export function Counter() {
             console.log('employmentMonthlyGross:', state.employmentMonthlyGross);
             console.log('otherSourceMonthlyGross:', state.otherSourceMonthlyGross);
             // Additional logic or API calls can be performed here
-        
+       */
         
 
     };
@@ -831,11 +963,11 @@ export function Counter() {
                             Company Name
                         </Label>
                         <Col sm={10}>
-                            {formErrors && (
+                            {/*{formErrors && (
                                 <label style={{ color: "red" }} htmlFor="message">
                                     {formErrors}
                                 </label>
-                            )}
+                            )}*/}
                             <Input
                                 id="companyName"
                                 name="companyName"
@@ -844,8 +976,10 @@ export function Counter() {
                                 placeholder="with a placeholder"
                                 type="text"
                                 className="inputCompanyName"
+                                onBlur={handleBlur}
                                 //required
                             />
+                            {errors.companyName && <span style={{color:'red'} }> {errors.companyName}</span>}
                         </Col>
 
 
@@ -872,8 +1006,11 @@ export function Counter() {
                                 type="text"
                                 onChange={handleChange}
                                 className="inputAgentFirstName"
+                                onBlur={handleBlur}
                             />
+                            {errors.agentFirstname && <span style={{ color: 'red' }}> {errors.agentFirstname}</span>}
                         </Col>
+                        
                         <Label for="agentLastname" className="agentLastname" sm={2} >
                             Last Name
                         </Label>
@@ -886,7 +1023,9 @@ export function Counter() {
                                 onChange={handleChange}
                                 type="text"
                                 className="inputAgentLastName"
+                                onBlur={handleBlur}
                             />
+                            {errors.agentLastname && <span style={{ color: 'red' }}> {errors.agentLastname}</span>}
                         </Col>
 
                     </FormGroup>
@@ -904,8 +1043,10 @@ export function Counter() {
                                 placeholder="with a placeholder"
                                 type="email"
                                 onChange={handleChange}
+                                onBlur={handleBlur}
                                 className="inputHousingProviderEmail"
                             />
+                            {errors.housingProviderEmail && <span style={{ color: 'red' }}> {errors.housingProviderEmail}</span>}
                         </Col>
 
                     </FormGroup>
@@ -1056,6 +1197,28 @@ export function Counter() {
                     </FormGroup>
 
 
+                   
+
+
+                    <FormGroup row>
+
+                        <Label for="buildingAddress" className="buildingAddress" md={2} >
+                            Address
+                        </Label>
+
+                        <Col md={10}>
+                            <Input
+                                id="buildingAddress"
+                                name="buildingAddress"
+                                value={state.buildingAddress}
+                                placeholder="Building Site Address"
+                                type="text"
+                                onChange={handleChange}
+                                className="inputBuildingAddress"
+                            />
+                        </Col>
+
+                    </FormGroup>
                     <FormGroup row>
                         <Label
                             for="buildingInfo"
@@ -1091,27 +1254,6 @@ export function Counter() {
                                 </option>
                             </Input>
                         </Col>
-                    </FormGroup>
-
-
-                    <FormGroup row>
-
-                        <Label for="buildingAddress" className="buildingAddress" md={2} >
-                            Address
-                        </Label>
-
-                        <Col md={10}>
-                            <Input
-                                id="buildingAddress"
-                                name="buildingAddress"
-                                value={state.buildingAddress}
-                                placeholder="Building Site Address"
-                                type="text"
-                                onChange={handleChange}
-                                className="inputBuildingAddress"
-                            />
-                        </Col>
-
                     </FormGroup>
 
                     <Row>
@@ -1299,6 +1441,11 @@ export function Counter() {
                         </Col>
                     </FormGroup>
                     <FormGroup row>
+                    {/*{formErrors && (
+                                <label style={{ color: "red" }} htmlFor="message">
+                                    {formErrors}
+                                </label>
+                            )}*/}
                         <Col md={4}>
                             <Label
                                 for="tenantEmail"
@@ -1320,6 +1467,24 @@ export function Counter() {
                         <Col md={4}>
                             <Label for="sincnd" className="sincnd" >
                                 SIN / SSN
+                            </Label>
+                            <Input
+                                id="sincnd"
+                                name="sincnd"
+
+                                placeholder="SIN 123-45-6789"
+                                type="text"
+                                onChange={handleChange}
+                                onClick={onclickToggle}
+                                onBlur={mouseoutMask}
+                                //onKeyUp={mask(this, numHyphen)}
+                                maxLength="9"
+                                className="inputSinCND"
+                            />
+                        </Col>
+                        <Col md={4}>
+                            <Label for="sincnd" className="sincnd" >
+                                SIN 
                             </Label>
                             <Input
                                 id="sincnd"
@@ -2105,6 +2270,7 @@ export function Counter() {
                                         value={state.employerCompanyName}
                                         onChange={handleChange}
                                         className="inputemployerCompanyName"
+                                        
                                         //required
                                     />
                                 </Col>
