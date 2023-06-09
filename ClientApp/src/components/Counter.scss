@@ -25,3 +25,8 @@ input[type = 'file'] {
 .ErrorSpan{
     color: red;
 }
+.error {
+    
+    box-shadow: 0px 0px 0px 0.8px red;
+    transition: border-color 0.5s ease-out;
+}

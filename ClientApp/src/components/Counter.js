@@ -17,7 +17,7 @@ export function Counter() {
 */      companyName: '',
         agentFirstname: '',
         agentLastname: '',
-        housingProviderEmail: '',
+        agentEmail: '',
         bldgSite: '',
         bldgInfo: '',
         bldgStreetAddress: '',
@@ -171,7 +171,8 @@ export function Counter() {
         let errorMessage = null;
 
         if (state.hasOwnProperty(name)) {
-            if (name === 'housingProviderEmail') {
+            if (name === 'agentEmail' || name === ' tenantEmail' || name === 'HousingProviderEmail' || name === 'FormerHousingProviderEmail1'
+                || name === 'FormerHousingProviderEmail2' || name === 'FormerHousingProviderEmail3') {
                 errorMessage = validateRequired(value);
                 if (!errorMessage) {
                     errorMessage = validateEmail(value); // Additional validation for email format
@@ -975,7 +976,7 @@ export function Counter() {
                                 onChange={handleChange}
                                 placeholder="with a placeholder"
                                 type="text"
-                                className="inputCompanyName"
+                                className={errors.companyName ? 'error' : ''}
                                 onBlur={handleBlur}
                                 //required
                             />
@@ -999,13 +1000,13 @@ export function Counter() {
 
                         <Col md={3}>
                             <Input
-                                id="exampleEmail"
+                                id="agentFirstname"
                                 name="agentFirstname"
                                 value={state.agentFirstname}
                                 placeholder="with a placeholder"
                                 type="text"
                                 onChange={handleChange}
-                                className="inputAgentFirstName"
+                                className={errors.agentFirstname ? 'error' : ''}
                                 onBlur={handleBlur}
                             />
                             {errors.agentFirstname && <span style={{ color: 'red' }}> {errors.agentFirstname}</span>}
@@ -1022,8 +1023,9 @@ export function Counter() {
                                 placeholder="with a placeholder"
                                 onChange={handleChange}
                                 type="text"
-                                className="inputAgentLastName"
+                                className={errors.agentLastname ? 'error' : ''}
                                 onBlur={handleBlur}
+                            //required
                             />
                             {errors.agentLastname && <span style={{ color: 'red' }}> {errors.agentLastname}</span>}
                         </Col>
@@ -1031,22 +1033,23 @@ export function Counter() {
                     </FormGroup>
                     <FormGroup row>
 
-                        <Label for="housingProviderEmail" className="housingProviderEmail" md={2} >
+                        <Label for="agentEmail" className="agentEmail" md={2} >
                             <strong>Email Address:</strong>
                         </Label>
 
                         <Col md={10}>
                             <Input
-                                id="housingProviderEmail"
-                                name="housingProviderEmail"
-                                value={state.housingProviderEmail}
+                                id="agentEmail"
+                                name="agentEmail"
+                                value={state.agentEmail}
                                 placeholder="with a placeholder"
                                 type="email"
                                 onChange={handleChange}
+                                className={errors.agentEmail ? 'error' : ''}
                                 onBlur={handleBlur}
-                                className="inputHousingProviderEmail"
+                            //required
                             />
-                            {errors.housingProviderEmail && <span style={{ color: 'red' }}> {errors.housingProviderEmail}</span>}
+                            {errors.agentEmail && <span style={{ color: 'red' }}> {errors.agentEmail}</span>}
                         </Col>
 
                     </FormGroup>
@@ -1069,9 +1072,12 @@ export function Counter() {
                                 value={state.bldgSite}
                                 placeholder="Apartment, studio, or floor"
                                 type="text"
-                                onChange={handleChange}
-                                className="inputBuildingSite"
+                                onChange={handleChange}                              
+                                className={errors.bldgSite ? 'error' : ''}
+                                onBlur={handleBlur}
+                            //required
                             />
+                            {errors.bldgSite && <span style={{ color: 'red' }}> {errors.bldgSite}</span>}
                         </Col>
 
                     </FormGroup>
@@ -1089,8 +1095,11 @@ export function Counter() {
                                 type="text"
                                 value={state.bldgStreetAddress}
                                 onChange={handleUpdateState}
-                                className="inputbldgStreetAddress"
+                                className={errors.bldgStreetAddress ? 'error' : ''}
+                                onBlur={handleBlur}
+                            //required
                             />
+                            {errors.bldgStreetAddress && <span style={{ color: 'red' }}> {errors.bldgStreetAddress}</span>}
 
 
                         </Col>
@@ -1106,9 +1115,11 @@ export function Counter() {
                                 type="text"
                                 onChange={handleChange}
                                 value={state.bldgCityAddress}
-
-                                className="inputbldgCityAddress"
+                                className={errors.bldgCityAddress ? 'error' : ''}
+                                onBlur={handleBlur}
+                            //required
                             />
+                            {errors.bldgCityAddress && <span style={{ color: 'red' }}> {errors.bldgCityAddress}</span>}
 
 
                         </Col>
@@ -1125,8 +1136,11 @@ export function Counter() {
                                 type="text"
                                 value={state.bldgStateAddress}
                                 onChange={handleChange}
-                                className="inputbldgStateAddress"
+                                className={errors.bldgStateAddress ? 'error' : ''}
+                                onBlur={handleBlur}
+                            //required
                             />
+                            {errors.bldgStateAddress && <span style={{ color: 'red' }}> {errors.bldgStateAddress}</span>}
 
 
                         </Col>
@@ -1141,8 +1155,11 @@ export function Counter() {
                                 type="text"
                                 value={state.bldgPostCodeAddress}
                                 onChange={handleChange}
-                                className="inputbldgPostCodeAddress"
+                                className={errors.bldgPostCodeAddress ? 'error' : ''}
+                                onBlur={handleBlur}
+                            //required
                             />
+                            {errors.bldgPostCodeAddress && <span style={{ color: 'red' }}> {errors.bldgPostCodeAddress}</span>}
 
                         </Col>
                         <Col md={2}>
@@ -1156,8 +1173,11 @@ export function Counter() {
                                 type="text"
                                 value={state.bldgCountryAddress}
                                 onChange={handleChange}
-                                className="inputbldgCountryAddress"
+                                className={errors.bldgCountryAddress ? 'error' : ''}
+                                onBlur={handleBlur}
+                            //required
                             />
+                            {errors.bldgCountryAddress && <span style={{ color: 'red' }}> {errors.bldgCountryAddress}</span>}
 
                         </Col>
 
@@ -1175,8 +1195,11 @@ export function Counter() {
                                 type="text"
                                 value={state.bldgMultiUnitAddress}
                                 onChange={handleChange}
-                                className="inputbldgMultiUnitAddress"
+                                className={errors.bldgMultiUnitAddress ? 'error' : ''}
+                                onBlur={handleBlur}
+                            //required
                             />
+                            {errors.bldgMultiUnitAddress && <span style={{ color: 'red' }}> {errors.bldgMultiUnitAddress}</span>}
 
                         </Col>
                         <Col md={2}>
@@ -1190,8 +1213,11 @@ export function Counter() {
                                 type="text"
                                 value={state.bldgResidentialBusinessAddress}
                                 onChange={handleChange}
-                                className="inputbldgResidentialBusinessAddress"
+                                className={errors.bldgResidentialBusinessAddress ? 'error' : ''}
+                                onBlur={handleBlur}
+                            //required
                             />
+                            {errors.bldgResidentialBusinessAddress && <span style={{ color: 'red' }}> {errors.bldgResidentialBusinessAddress}</span>}
 
                         </Col>
                     </FormGroup>
@@ -1214,8 +1240,11 @@ export function Counter() {
                                 placeholder="Building Site Address"
                                 type="text"
                                 onChange={handleChange}
-                                className="inputBuildingAddress"
+                                className={errors.buildingAddress ? 'error' : ''}
+                                onBlur={handleBlur}
+                            //required
                             />
+                            {errors.buildingAddress && <span style={{ color: 'red' }}> {errors.buildingAddress}</span>}
                         </Col>
 
                     </FormGroup>
@@ -1232,10 +1261,11 @@ export function Counter() {
                                 id="buildingInfo"
                                 name="buildingInfo"
                                 value={state.buildingInfo}
-                                className="inputbuildingInfo"
+                               
                                 type="select"
-                                onChange={handleChange}
-
+                                onChange={handleChange}                             
+                                               
+                            
                             >
                                 <option>
                                     1
@@ -1253,6 +1283,7 @@ export function Counter() {
                                     5
                                 </option>
                             </Input>
+                            
                         </Col>
                     </FormGroup>
 
@@ -1298,25 +1329,30 @@ export function Counter() {
                                     name="dateValue"
                                     value={state.dateValue}
                                     onChange={handleChange}
+                                    className={errors.dateValue ? 'error' : ''}
+                                    onBlur={handleBlur}
+                                //required
                                 />
+                                {errors.dateValue && <span style={{ color: 'red' }}> {errors.dateValue}</span>}
                             </FormGroup>
                         </Col>
-                        <Col md={5}>
+                        <Col md={5}>``
 
                             <Label for="leaseReportRadio" >
                                 Send me my free leasing history report and score?
                             </Label >
                             <Row className="row-cols-lg-auto ml-3 align-self-baseline">
                                 <FormGroup check className="leaseReportRadio">
-
-                                    <Input
-                                        name="sendFreeReport"
-                                        type="radio"
-                                        value="true"
-                                        checked={state.sendFreeReport === "true"}
-                                        onChange={handleChange}
-                                    />
                                     <Label check>
+                                    <Input
+                                            name="sendFreeReport"
+                                            type="radio"
+                                            value="true"
+                                            checked={state.sendFreeReport === "true"}
+                                            onChange={handleChange}
+                                            defaultChecked={true}
+                                    />
+                                   
                                         Yes
                                     </Label>
 
@@ -1326,6 +1362,7 @@ export function Counter() {
                                 {' '}
 
                                 <FormGroup check className="leaseReportRadio">
+                                    <Label check>
                                     <Input
                                         name="sendFreeReport"
                                         type="radio"
@@ -1334,7 +1371,7 @@ export function Counter() {
                                         onChange={handleChange}
 
                                     />
-                                    <Label check>
+                                   
                                         No
                                     </Label>
                                 </FormGroup>

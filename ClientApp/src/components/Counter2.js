@@ -16,7 +16,7 @@ export function Counter() {
 */      companyName: '',
         agentFirstname: '',
         agentLastname: '',
-        housingProviderEmail: '',
+        agentEmail: '',
         bldgSite: '',
         bldgInfo: '',
         bldgStreetAddress: '',
