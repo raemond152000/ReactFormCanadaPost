@@ -39,6 +39,7 @@ export function Counter() {
         tenantEmail: '',
         tenantBirthdate: '',
         sincnd: '',
+        sinusa: '',
 
 
         /*app Personal Information*/
@@ -131,7 +132,26 @@ export function Counter() {
     const [showAddress1, setShowAddress1] = useState(false);
     const [showAddress2, setShowAddress2] = useState(false);
 
+    const [selectedOption, setSelectedOption] = useState('');
+    const [address, setAddress] = useState('');
 
+    //Company Search Input Value
+    const [searchValue, setSearchValue] = useState('');
+    const [filteredOptions, setFilteredOptions] = useState([]);
+
+    //Set Select Building
+    const [selectedBuildingSite, setSelectedBuildingSite] = useState('');
+   
+
+
+    const databaseValues = [
+        { id: 1, name: 'Candor Properties1', address: 'Finch Ave', leaseAgentFirstName: 'Jane', leaseAgentLastName: 'Doe', leaseAgentEmail : ' Jane@gmail.com' },
+        { id: 2, name: 'Candor Properties2', address: 'Spadina 223', leaseAgentFirstName: 'Daryl', leaseAgentLastName: 'Till', leaseAgentEmail: ' Daryl@gmail.com' },
+        { id: 3, name: 'Candor Properties3', address: 'Queens Ave', leaseAgentFirstName: 'Anne', leaseAgentLastName: 'Curtis', leaseAgentEmail: ' Anne@gmail.com' },
+        { id: 4, name: 'RentCheck Properties1', address: 'QueensWay Ave', leaseAgentFirstName: 'Curtis', leaseAgentLastName: 'Blaze', leaseAgentEmail: ' Curtis@gmail.com' },
+        { id: 5, name: 'RentCheck Properties2', address: 'York Ave', leaseAgentFirstName: 'Jon', leaseAgentLastName: 'Jones', leaseAgentEmail: ' Jon@gmail.com' },
+        { id: 6, name: 'RentCheck Properties3', address: 'Dupont Ave', leaseAgentFirstName: 'Mark', leaseAgentLastName: 'Hunt', leaseAgentEmail: ' Mark@gmail.com' },
+    ];
 
 
     const handleChange = (e) => {
@@ -141,26 +161,20 @@ export function Counter() {
             ...prevState,
             [e.target.name]: e.target.value,
 
-        }));
-     
-
-       
-        /*//}
-        const title = document.getElementById("bldgStreetAddress").value;
-        setInputValue(title);
-        e.preventDefault();*/
+        }));     
+                      
         validateField(e.target.name, e.target.value);
     };
 
 
-    const handleUpdateState = () => {
+    /*const handleUpdateState = () => {
         const newValue = inputRef.current.value;
         setState((prevState) => ({
             ...prevState,
             [state.bldgStreetAddress]: newValue,
 
         }));
-    }
+    }*/
     //Required Field Validation
     const handleBlur = (e) => {
         const { name, value } = e.target;
@@ -186,6 +200,7 @@ export function Counter() {
                 [name]: errorMessage,
             }));
         }
+        
 };
 
     const validateRequired = (value) => {
@@ -197,12 +212,60 @@ export function Counter() {
     const validateEmail = (value) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(value)) {
-            return 'Invalid email format';
+            return 'Email format must contain "@"';
         }
         return null;
+    }; 
+
+
+    //Search Company Name
+
+    const handleSearchChange = (event) => {
+        const value = event.target.value;
+        setSearchValue(value);
+
+        // Filter the options based on the search value
+        const matchedOptions = databaseValues.filter(option => option.name.toLowerCase().includes(value.toLowerCase()));
+
+        // Update the options of the existing select field
+        const selectField = document.getElementById('buildingSite');
+        selectField.innerHTML = '';
+        matchedOptions.forEach(option => {
+            const optionElement = document.createElement('option');
+            optionElement.value = option.name;
+            optionElement.text = option.name;
+            selectField.appendChild(optionElement);
+        });
     };
 
+    //Building Option Select Value Change
 
+    const handleBuildingSiteChange = (event) => {
+        const selectedValue = event.target.value;
+
+        // Find the matching building site in the database
+        const matchedBuildingSite = databaseValues.find(option => option.name === selectedValue);
+
+        if (matchedBuildingSite) {
+            setSelectedBuildingSite(matchedBuildingSite.name);
+
+            // Set the values of all fields with the corresponding data values
+            const fieldsToUpdate = ['leaseAgentFirstName', 'leaseAgentLastName', 'address', 'leaseAgentEmail'];
+
+            fieldsToUpdate.forEach(field => {
+                document.getElementById(field).value = matchedBuildingSite[field];
+            });
+        } else {
+            setSelectedBuildingSite('');
+
+            // Reset the values of all fields
+            const fieldsToUpdate = ['leaseAgentFirstName', 'leaseAgentLastName', 'address', 'leaseAgentEmail'];
+
+            fieldsToUpdate.forEach(field => {
+                document.getElementById(field).value = '';
+            });
+        }
+    }
     const handleSelectnumMonthsChange = (e) => {
         setState((prevState) => ({
             ...prevState,
@@ -667,11 +730,6 @@ export function Counter() {
     };
 
 
-
-
-
-
-
     function mask(o, f) {
         setTimeout(() => {
             const v = f(o.value);
@@ -768,6 +826,17 @@ export function Counter() {
 
         e.preventDefault();
     }
+    const onclickToggleSinUSA = (e) => {
+        const ele1 = document.getElementById("sinusa");
+        const str1 = ele1.getAttribute("data-orig");
+        //if (ele.value.split("*").length-1  === 7) {
+        ele1.value = str1.replace(/(\d{3})(\d{2})(\d{4})/, "$1-$2-$3");
+        //} 
+        /* ele.value = str.replace(/(\d{3})(\d{2})(\d{4})/, "$1-$2-$3"); */
+        console.log(ele1.value);
+
+        e.preventDefault();
+    }
 
     const mouseoutMask = () => {
         /* document.getElementById("sin").addEventListener('mousemove', (event) => {
@@ -782,6 +851,22 @@ export function Counter() {
         const res = str.replace(reg, (m) => "*".repeat(m.length));
         document.getElementById("sincnd").value = res;
         //}
+       
+    };
+    const mouseoutMaskUSA = () => {
+        /* document.getElementById("sin").addEventListener('mousemove', (event) => {
+          event.preventDefault();
+        }, false); */
+
+        const ele = document.getElementById("sinusa");
+        const str = ele.value.replace(/-/g, "");
+        const reg = str.slice(0, -2);
+        ele.setAttribute("data-orig", str);
+        //if (str.length  === 9) {
+        const res = str.replace(reg, (m) => "*".repeat(m.length));
+        document.getElementById("sinusa").value = res;
+        //}
+        handleBlur();
     };
 
     /*File Upload*/
@@ -849,7 +934,7 @@ export function Counter() {
             console.log(errors);
         }*/
           
-           /* //Property Information
+            //Property Information
             setInputValue(document.getElementById("bldgStreetAddress").value);
             console.log(inputRef);
             console.log('CompanyName:', state.companyName);
@@ -868,6 +953,7 @@ export function Counter() {
             console.log('bldgAddress:', state.bldgAddress);
             console.log('leaseTerm:', state.leaseTerm);
             console.log('leaseDate:', state.dateValue);
+            console.log('sendmyFreeReport:', state.sendFreeReport);
             //Tenant
             console.log('tenantSal:', state.tenantSal);
             console.log('tenantFirstname:', state.tenantFirstname);
@@ -923,7 +1009,7 @@ export function Counter() {
             console.log('employmentMonthlyGross:', state.employmentMonthlyGross);
             console.log('otherSourceMonthlyGross:', state.otherSourceMonthlyGross);
             // Additional logic or API calls can be performed here
-       */
+       
         
 
     };
@@ -956,37 +1042,83 @@ export function Counter() {
                         </Label>
                     </div>
                     <br />
-                    <FormGroup row>
-
-                     
-            
-                        <Label for="companyName" className="companyName" sm={2} >
+                    <FormGroup row>                                         
+      
+                        <Label for="searchField" className="searchField" sm={2} >
                             Company Name
                         </Label>
-                        <Col sm={10}>
-                            {/*{formErrors && (
-                                <label style={{ color: "red" }} htmlFor="message">
-                                    {formErrors}
-                                </label>
-                            )}*/}
+                     
+                        <Col md={10}>
                             <Input
-                                id="companyName"
-                                name="companyName"
-                                value={state.companyName}
-                                onChange={handleChange}
-                                placeholder="with a placeholder"
+                                id="searchField"
+                                name="searchField"
+                                value={searchValue}
+                                placeholder="Apartment, studio, or floor"
                                 type="text"
-                                className={errors.companyName ? 'error' : ''}
+                                onChange={handleSearchChange}
+                                className={errors.bldgSite ? 'error' : ''}
                                 onBlur={handleBlur}
-                                //required
+                            //required
                             />
-                            {errors.companyName && <span style={{color:'red'} }> {errors.companyName}</span>}
-                        </Col>
-
+                            {errors.bldgSite && <span style={{ color: 'red' }}> {errors.bldgSite}</span>}
+                        </Col>                 
 
                     </FormGroup>
+                    
+                    <FormGroup row>
 
+                        <Label for="bldgSite" className="bldgSite" md={2} >
+                            Building Site
+                        </Label>
+                        <Col md={10}>
+                            <div>
+                                
+                                <Input id="buildingSite" type="select" name="buildingSite"  onChange={handleBuildingSiteChange}>
+                                    <option value="">Select...</option>
+                                    {/*{databaseValues.map(option => (
+                                        <option key={option.id} value={option.name}>{option.name}</option>
+                                    ))}*/}
+                                </Input>
+                           
+                                </div>
 
+                        </Col>     
+                        
+
+                    </FormGroup>
+                    <FormGroup row>
+
+                        <Label for="buildingAddress" className="buildingAddress" md={2} >
+                            Address
+                        </Label>
+
+                        <Col md={10}>
+                            <Input
+                                id="address"
+                                type="text"
+                                //value={state.AddressField}                                 
+                                placeholder="Building Site Address"
+                                onChange={handleChange}
+                                className={errors.buildingAddress ? 'error' : ''}
+                                onBlur={handleBlur}
+                            //required
+                            />
+                            {errors.buildingAddress && <span style={{ color: 'red' }}> {errors.buildingAddress}</span>}
+                        </Col>
+
+                    </FormGroup>
+                    {/*<div>
+                       
+
+                        <label htmlFor="leaseAgentFirstName">Lease Agent First Name:</label>
+                        <input id="leaseAgentFirstName" type="text" />
+
+                        <label htmlFor="leaseAgentLastName">Lease Agent Last Name:</label>
+                        <input id="leaseAgentLastName" type="text" />
+
+                        <label htmlFor="leaseAgentEmail">Lease Agent Email:</label>
+                        <input id="leaseAgentEmail" type="text" />
+                    </div>*/}
                     <FormGroup row>
 
                         <Label for="Leasing" className="Leasing" md={2} >
@@ -1000,26 +1132,26 @@ export function Counter() {
 
                         <Col md={3}>
                             <Input
-                                id="agentFirstname"
-                                name="agentFirstname"
-                                value={state.agentFirstname}
+                                id="leaseAgentFirstName"
+                                name="leaseAgentFirstName"
+                                //value={state.leaseAgentFirstName}
                                 placeholder="with a placeholder"
                                 type="text"
                                 onChange={handleChange}
-                                className={errors.agentFirstname ? 'error' : ''}
+                                className={errors.leaseAgentFirstName ? 'error' : ''}
                                 onBlur={handleBlur}
                             />
-                            {errors.agentFirstname && <span style={{ color: 'red' }}> {errors.agentFirstname}</span>}
+                            {errors.leaseAgentFirstName && <span style={{ color: 'red' }}> {errors.leaseAgentFirstName}</span>}
                         </Col>
                         
-                        <Label for="agentLastname" className="agentLastname" sm={2} >
+                        <Label for="leaseAgentLastName" className="leaseAgentLastName" sm={2} >
                             Last Name
                         </Label>
                         <Col md={3}>
                             <Input
-                                id="agentLastname"
-                                name="agentLastname"
-                                value={state.agentLastname}
+                                id="leaseAgentLastName"
+                                name="leaseAgentLastName"
+                                value={state.leaseAgentLastName}
                                 placeholder="with a placeholder"
                                 onChange={handleChange}
                                 type="text"
@@ -1033,15 +1165,15 @@ export function Counter() {
                     </FormGroup>
                     <FormGroup row>
 
-                        <Label for="agentEmail" className="agentEmail" md={2} >
+                        <Label for="leaseAgentEmail" className="leaseAgentEmail" md={2} >
                             <strong>Email Address:</strong>
                         </Label>
 
                         <Col md={10}>
                             <Input
-                                id="agentEmail"
-                                name="agentEmail"
-                                value={state.agentEmail}
+                                id="leaseAgentEmail"
+                                name="leaseAgentEmail"
+                                value={state.leaseAgentEmail}
                                 placeholder="with a placeholder"
                                 type="email"
                                 onChange={handleChange}
@@ -1059,7 +1191,7 @@ export function Counter() {
                         </h6>
                     </div>
 
-                    <FormGroup row>
+                   {/* <FormGroup row>
 
                         <Label for="bldgSite" className="bldgSite" md={2} >
                             Building Site
@@ -1094,7 +1226,7 @@ export function Counter() {
                                 placeholder=""
                                 type="text"
                                 value={state.bldgStreetAddress}
-                                onChange={handleUpdateState}
+                                //onChange={handleUpdateState}
                                 className={errors.bldgStreetAddress ? 'error' : ''}
                                 onBlur={handleBlur}
                             //required
@@ -1181,9 +1313,9 @@ export function Counter() {
 
                         </Col>
 
-                    </FormGroup>
+                    </FormGroup>*/}
 
-                    <FormGroup row>
+                   {/* <FormGroup row>
                         <Col md={2}>
                             <Label for="bldgMultiUnitAddress" className="bldgMultiUnitAddress" >
                                 No of Units:
@@ -1220,34 +1352,13 @@ export function Counter() {
                             {errors.bldgResidentialBusinessAddress && <span style={{ color: 'red' }}> {errors.bldgResidentialBusinessAddress}</span>}
 
                         </Col>
-                    </FormGroup>
+                    </FormGroup>*/}
 
 
                    
 
 
-                    <FormGroup row>
-
-                        <Label for="buildingAddress" className="buildingAddress" md={2} >
-                            Address
-                        </Label>
-
-                        <Col md={10}>
-                            <Input
-                                id="buildingAddress"
-                                name="buildingAddress"
-                                value={state.buildingAddress}
-                                placeholder="Building Site Address"
-                                type="text"
-                                onChange={handleChange}
-                                className={errors.buildingAddress ? 'error' : ''}
-                                onBlur={handleBlur}
-                            //required
-                            />
-                            {errors.buildingAddress && <span style={{ color: 'red' }}> {errors.buildingAddress}</span>}
-                        </Col>
-
-                    </FormGroup>
+                   
                     <FormGroup row>
                         <Label
                             for="buildingInfo"
@@ -1336,7 +1447,7 @@ export function Counter() {
                                 {errors.dateValue && <span style={{ color: 'red' }}> {errors.dateValue}</span>}
                             </FormGroup>
                         </Col>
-                        <Col md={5}>``
+                        <Col md={5}>
 
                             <Label for="leaseReportRadio" >
                                 Send me my free leasing history report and score?
@@ -1344,22 +1455,24 @@ export function Counter() {
                             <Row className="row-cols-lg-auto ml-3 align-self-baseline">
                                 <FormGroup check className="leaseReportRadio">
                                     <Label check>
+                                   
                                     <Input
                                             name="sendFreeReport"
                                             type="radio"
                                             value="true"
                                             checked={state.sendFreeReport === "true"}
-                                            onChange={handleChange}
-                                            defaultChecked={true}
+                                        onChange={handleChange}
+                                        className={errors.dateValue ? 'error' : ''}
+                                            onBlur={handleBlur}
                                     />
-                                   
+                                        {errors.sendFreeReport && <span style={{ color: 'red' }}> {errors.sendFreeReport}</span>}
+                                    
                                         Yes
                                     </Label>
 
-
                                 </FormGroup>
 
-                                {' '}
+                                
 
                                 <FormGroup check className="leaseReportRadio">
                                     <Label check>
@@ -1368,16 +1481,18 @@ export function Counter() {
                                         type="radio"
                                         value="false"
                                         checked={state.sendFreeReport === "false"}
-                                        onChange={handleChange}
-
+                                            onChange={handleChange}
+                                            className={errors.sendFreeReport ? 'error' : ''}
+                                            onBlur={handleBlur}
                                     />
-                                   
+                                        {errors.sendFreeReport && <span style={{ color: 'red' }}> {errors.sendFreeReport}</span>}
                                         No
                                     </Label>
                                 </FormGroup>
                             </Row>
                         </Col>
-
+                        
+                       
                     </Row>
                 </div>
                 <br />
@@ -1400,6 +1515,7 @@ export function Counter() {
                                 className="inputTenantSal"
                                 type="select"
                                 onChange={handleChange}
+                               
                             >
                                 <option>
                                     Mr
@@ -1427,8 +1543,11 @@ export function Counter() {
                                 placeholder="with a placeholder"
                                 type="text"
                                 onChange={handleChange}
-                                className="inputTenantFirstName"
+                                
+                                className={errors.tenantSal ? 'error' : ''}
+                                onBlur={handleBlur}
                             />
+                            {errors.tenantFirstname && <span style={{ color: 'red' }}> {errors.tenantFirstname}</span>}
                         </Col>
                         <Col md={1}>
                             <Label for="tenantInitials" className="tenantInitals" >
@@ -1457,8 +1576,10 @@ export function Counter() {
                                 placeholder="with a placeholder"
                                 onChange={handleChange}
                                 type="text"
-                                className="inputTenantLastName"
+                                className={errors.tenantLastname ? 'error' : ''}
+                                onBlur={handleBlur}
                             />
+                            {errors.tenantLastname && <span style={{ color: 'red' }}> {errors.tenantLastname}</span>}
 
                         </Col>
 
@@ -1466,14 +1587,17 @@ export function Counter() {
                             <FormGroup>
 
                                 <Label for="tenantBirthdate: ">
-                                    When would you like to move in?
+                                   Date of Birth:
                                 </Label>
                                 <Input
                                     type="date"
                                     name="tenantBirthdate "
                                     value={state.datetenantBirthdate}
                                     onChange={handleChange}
+                                    className={errors.tenantLastname ? 'error' : ''}
+                                    onBlur={handleBlur}
                                 />
+                                {errors.datetenantBirthdate && <span style={{ color: 'red' }}> {errors.datetenantBirthdate}</span>}
                             </FormGroup>
                         </Col>
                     </FormGroup>
@@ -1497,13 +1621,15 @@ export function Counter() {
                                 placeholder="with a placeholder"
                                 type="email"
                                 onChange={handleChange}
-                                className="inputTenantEmail"
+                                className={errors.tenantEmail ? 'error' : ''}
+                                onBlur={handleBlur}
                             />
+                            {errors.tenantEmail && <span style={{ color: 'red' }}> {errors.tenantEmail}</span>}
 
                         </Col>
                         <Col md={4}>
                             <Label for="sincnd" className="sincnd" >
-                                SIN / SSN
+                                SIN Canada (Optional)
                             </Label>
                             <Input
                                 id="sincnd"
@@ -1520,22 +1646,24 @@ export function Counter() {
                             />
                         </Col>
                         <Col md={4}>
-                            <Label for="sincnd" className="sincnd" >
-                                SIN 
+                            <Label for="sinusa" className="sinusa" >
+                                SSN USA
                             </Label>
                             <Input
-                                id="sincnd"
-                                name="sincnd"
+                                id="sinusa"
+                                name="sinusa"
 
                                 placeholder="SIN 123-45-6789"
                                 type="text"
                                 onChange={handleChange}
-                                onClick={onclickToggle}
-                                onBlur={mouseoutMask}
+                                onClick={onclickToggleSinUSA}
+                                onBlur={mouseoutMaskUSA}
                                 //onKeyUp={mask(this, numHyphen)}
                                 maxLength="9"
-                                className="inputSinCND"
+                                className={errors.sinusa ? 'error' : ''}
+                             
                             />
+                            {errors.sinusa && <span style={{ color: 'red' }}> {errors.sinusa}</span>}
                         </Col>
                     </FormGroup>
 
@@ -1556,8 +1684,10 @@ export function Counter() {
                         placeholder="with a placeholder"
                         type="text"
                         //onChange={handleChange}
-                        className="inputAppCurrentAddress"
+                        onBlur={handleBlur}
+                        className={errors.appCurrentAddress ? 'error' : ''}
                     />
+                    {errors.appCurrentAddress && <span style={{ color: 'red' }}> {errors.appCurrentAddress}</span>}
 
                     <br />
                     <FormGroup row>
@@ -1573,8 +1703,10 @@ export function Counter() {
                                 type="text"
                                 value={state.appCurrentStreetAddress}
                                 onChange={handleChange}
-                                className="inputappCurrentStreetAddress"
+                                onBlur={handleBlur}
+                                className={errors.appCurrentStreetAddress ? 'error' : ''}
                             />
+                            {errors.appCurrentStreetAddress && <span style={{ color: 'red' }}> {errors.appCurrentStreetAddress}</span>}
                         </Col>
 
                         <Col md={2}>
@@ -1588,10 +1720,10 @@ export function Counter() {
                                 type="text"
                                 onChange={handleChange}
                                 value={state.appCurrentCityAddress}
-
-                                className="inputAppCurrentCityAddress"
+                                onBlur={handleBlur}
+                                className={errors.appCurrentCityAddress ? 'error' : ''}
                             />
-
+                            {errors.appCurrentCityAddress && <span style={{ color: 'red' }}> {errors.appCurrentCityAddress}</span>}
 
                         </Col>
 
@@ -1607,8 +1739,10 @@ export function Counter() {
                                 type="text"
                                 value={state.appCurrentProvinceState}
                                 onChange={handleChange}
-                                className="inputAppCurrentProvinceState"
+                                onBlur={handleBlur}
+                                className={errors.appCurrentProvinceState ? 'error' : ''}
                             />
+                            {errors.appCurrentProvinceState && <span style={{ color: 'red' }}> {errors.appCurrentProvinceState}</span>}
 
 
                         </Col>
@@ -1623,8 +1757,11 @@ export function Counter() {
                                 type="text"
                                 value={state.appCurrentPostalStateAddress}
                                 onChange={handleChange}
-                                className="inputAppCurrentPostalStateAddress"
+                                onBlur={handleBlur}
+                                className={errors.appCurrentPostalStateAddress ? 'error' : ''}
                             />
+                            {errors.appCurrentPostalStateAddress && <span style={{ color: 'red' }}> {errors.appCurrentPostalStateAddress}</span>}
+
 
                         </Col>
                         <Col md={2}>
@@ -1638,9 +1775,10 @@ export function Counter() {
                                 type="text"
                                 value={state.appCurrentCountryAddress}
                                 onChange={handleChange}
-                                className="inputppCurrentCountryAddress"
+                                onBlur={handleBlur}
+                                className={errors.appCurrentCountryAddress ? 'error' : ''}
                             />
-
+                            {errors.appCurrentCountryAddress && <span style={{ color: 'red' }}> {errors.appCurrentCountryAddress}</span>}
                         </Col>
 
                     </FormGroup>
@@ -1657,6 +1795,7 @@ export function Counter() {
                                 value={state.numMonthStay}
                                 type="select"
                                 onChange={handleSelectnumMonthsChange}
+
                             >
                                 {/*{numMonths.map((number) => (
                                     <option key={number} value={number}>{number}</option>
@@ -1680,9 +1819,10 @@ export function Counter() {
                                 placeholder="MM / YY"
                                 type="text"
                                 onChange={handleChange}
-                                className="inputApplicantMoveInDate"
+                                onBlur={handleBlur}
+                                className={errors.applicantMoveInDate ? 'error' : ''}
                             />
-
+                            {errors.applicantMoveInDate && <span style={{ color: 'red' }}> {errors.applicantMoveInDate}</span>}
                         </Col>
                         <br />
                         <Col md={4}>
@@ -1696,8 +1836,10 @@ export function Counter() {
                                 type="text"
                                 value={state.HousingProviderName}
                                 onChange={handleChange}
-                                className="inputHousingProviderName"
+                                onBlur={handleBlur}
+                                className={errors.HousingProviderName ? 'error' : ''}
                             />
+                            {errors.HousingProviderName && <span style={{ color: 'red' }}> {errors.HousingProviderName}</span>}
                         </Col>
                         <Col md={3}>
                             <Label for="HousingProviderEmail" className="HousingProviderEmail" >
@@ -1710,8 +1852,10 @@ export function Counter() {
                                 type="email"
                                 value={state.HousingProviderEmail}
                                 onChange={handleChange}
-                                className="inputHousingProviderEmail"
+                                onBlur={handleBlur}
+                                className={errors.HousingProviderEmail ? 'error' : ''}
                             />
+                            {errors.HousingProviderEmail && <span style={{ color: 'red' }}> {errors.HousingProviderEmail}</span>}
                         </Col>
                     </FormGroup>
                 </div>
@@ -1728,8 +1872,10 @@ export function Counter() {
                             placeholder="with a placeholder"
                             type="text"
                             // onChange={handleChange}
-                            className="inputappFormerAddress1"
+                            onBlur={handleBlur}
+                            className={errors.appFormerAddress1 ? 'error' : ''}
                         />
+                        {errors.appFormerAddress1 && <span style={{ color: 'red' }}> {errors.appFormerAddress1}</span>}
                         <br />
                         <FormGroup row>
 
@@ -1744,10 +1890,10 @@ export function Counter() {
                                     type="text"
                                     value={state.appFormerStreetAddress1}
                                     onChange={handleChange}
-                                    className="inputappFormerStreetAddress1"
-                                    //required
+                                    onBlur={handleBlur}
+                                    className={errors.appFormerStreetAddress1 ? 'error' : ''}
                                 />
-
+                                {errors.appFormerStreetAddress1 && <span style={{ color: 'red' }}> {errors.appFormerStreetAddress1}</span>}
 
                             </Col>
 
@@ -1762,11 +1908,11 @@ export function Counter() {
                                     type="text"
                                     onChange={handleChange}
                                     value={state.appFormerCityAddress1}
-                                    className="inputappFormerCityAddress1"
-                                    //required
+                                    onBlur={handleBlur}
+                                    className={errors.appFormerCityAddress1 ? 'error' : ''}
                                 />
 
-
+                                {errors.appFormerCityAddress1 && <span style={{ color: 'red' }}> {errors.appFormerCityAddress1}</span>}
                             </Col>
 
 
@@ -1781,10 +1927,10 @@ export function Counter() {
                                     type="text"
                                     value={state.appFormerProvinceState1}
                                     onChange={handleChange}
-                                    className="inputappFormerProvinceState1"
-                                    //required
+                                    onBlur={handleBlur}
+                                    className={errors.appFormerProvinceState1 ? 'error' : ''}
                                 />
-
+                                {errors.appFormerProvinceState1 && <span style={{ color: 'red' }}> {errors.appFormerProvinceState1}</span>}
 
                             </Col>
                             <Col md={2}>
@@ -1798,9 +1944,10 @@ export function Counter() {
                                     type="text"
                                     value={state.appFormerPostalStateAddress1}
                                     onChange={handleChange}
-                                    className="inputappFormerPostalStateAddress1"
-                                    //required
+                                    onBlur={handleBlur}
+                                    className={errors.appFormerPostalStateAddress1 ? 'error' : ''}
                                 />
+                                {errors.appFormerPostalStateAddress1 && <span style={{ color: 'red' }}> {errors.appFormerPostalStateAddress1}</span>}
 
                             </Col>
                             <Col md={2}>
@@ -1814,10 +1961,10 @@ export function Counter() {
                                     type="text"
                                     value={state.appFormerCountryAddress1}
                                     onChange={handleChange}
-                                    className="inputappFormerCountryAddress1"
-                                    //required
+                                    onBlur={handleBlur}
+                                    className={errors.appFormerCountryAddress1 ? 'error' : ''}
                                 />
-
+                                {errors.appFormerCountryAddress1 && <span style={{ color: 'red' }}> {errors.appFormerCountryAddress1}</span>}
                             </Col>
 
                         </FormGroup>
@@ -1836,9 +1983,10 @@ export function Counter() {
                                     placeholder="MM / YY"
                                     type="text"
                                     onChange={handleChange}
-                                    className="inputappMoveInDate1"
+                                    onBlur={handleBlur}
+                                    className={errors.appMoveInDate1 ? 'error' : ''}
                                 />
-
+                                {errors.appMoveInDate1 && <span style={{ color: 'red' }}> {errors.appMoveInDate1}</span>}
                             </Col>
                             <Col md={3}>
                                 <Label
@@ -1854,9 +2002,10 @@ export function Counter() {
                                     placeholder="MM / YY"
                                     type="text"
                                     onChange={handleChange}
-                                    className="inputappFormerMoveOutDate1"
+                                    //onBlur={handleBlur}
+                                    //className={errors.appFormerMoveOutDate1 ? 'error' : ''}
                                 />
-
+                              {/*  {errors.appFormerMoveOutDate1 && <span style={{ color: 'red' }}> {errors.appFormerMoveOutDate1}</span>}*/}
                             </Col>
 
                             <Col md={3}>
@@ -1870,8 +2019,10 @@ export function Counter() {
                                     type="text"
                                     value={state.FormerHousingProviderName1}
                                     onChange={handleChange}
-                                    className="inputFormerHousingProviderName1"
+                                    onBlur={handleBlur}
+                                    className={errors.FormerHousingProviderName1 ? 'error' : ''}
                                 />
+                                {errors.FormerHousingProviderName1 && <span style={{ color: 'red' }}> {errors.FormerHousingProviderName1}</span>}
                             </Col>
                             <Col md={3}>
                                 <Label for="HousingProviderEmail" className="FormerHousingProviderEmail1" >
@@ -1884,15 +2035,17 @@ export function Counter() {
                                     type="email"
                                     value={state.FormerHousingProviderEmail1}
                                     onChange={handleChange}
-                                    className="inputFormerHousingProviderEmail1"
+                                    onBlur={handleBlur}
+                                    className={errors.FormerHousingProviderEmail1 ? 'error' : ''}
                                 />
+                                {errors.FormerHousingProviderEmail1 && <span style={{ color: 'red' }}> {errors.FormerHousingProviderEmail1}</span>}
                             </Col>
                         </FormGroup>
 
                     </div>
 
                 }
-                {!showAddress && <p className="AddFormerAddress1" onClick={addFAddress}>+ Add more address Tae</p>} {/*Tae*/}
+                {!showAddress && <p className="AddFormerAddress1" onClick={addFAddress}>+ Add more address</p>} {/*Tae*/}
                 <div>
 
 
@@ -1908,8 +2061,10 @@ export function Counter() {
                                 placeholder="with a placeholder"
                                 type="text"
                                 //onChange={handleChange}
-                                className="inputappFormerAddress2"
+                                onBlur={handleBlur}
+                                className={errors.appFormerAddress2 ? 'error' : ''}
                             />
+                            {errors.appFormerAddress2 && <span style={{ color: 'red' }}> {errors.appFormerAddress2}</span>}
                             <br />
                             <FormGroup row>
 
@@ -1924,9 +2079,10 @@ export function Counter() {
                                         type="text"
                                         value={state.appFormerStreetAddress2}
                                         onChange={handleChange}
-                                        className="inputappFormerStreetAddress2"
+                                        onBlur={handleBlur}
+                                        className={errors.appFormerStreetAddress2 ? 'error' : ''}
                                     />
-
+                                    {errors.appFormerStreetAddress2 && <span style={{ color: 'red' }}> {errors.appFormerStreetAddress2}</span>}
 
                                 </Col>
 
@@ -1941,10 +2097,10 @@ export function Counter() {
                                         type="text"
                                         onChange={handleChange}
                                         value={state.appFormerCityAddress2}
-
-                                        className="inputappFormerCityAddress2"
+                                        onBlur={handleBlur}
+                                        className={errors.appFormerCityAddress2 ? 'error' : ''}
                                     />
-
+                                    {errors.appFormerCityAddress2 && <span style={{ color: 'red' }}> {errors.appFormerCityAddress2}</span>}
 
                                 </Col>
 
@@ -1960,9 +2116,10 @@ export function Counter() {
                                         type="text"
                                         value={state.appFormerProvinceState2}
                                         onChange={handleChange}
-                                        className="inputappFormerProvinceState2"
+                                        onBlur={handleBlur}
+                                        className={errors.appFormerProvinceState2 ? 'error' : ''}
                                     />
-
+                                    {errors.appFormerProvinceState2 && <span style={{ color: 'red' }}> {errors.appFormerProvinceState2}</span>}
 
                                 </Col>
                                 <Col md={2}>
@@ -1976,9 +2133,10 @@ export function Counter() {
                                         type="text"
                                         value={state.appFormerPostalStateAddress2}
                                         onChange={handleChange}
-                                        className="inputappFormerPostalStateAddress2"
+                                        onBlur={handleBlur}
+                                        className={errors.appFormerProvinceState2 ? 'error' : ''}
                                     />
-
+                                    {errors.appFormerPostalStateAddress2 && <span style={{ color: 'red' }}> {errors.appFormerPostalStateAddress2}</span>}
                                 </Col>
                                 <Col md={2}>
                                     <Label for="appFormerCountryAddress2" className="appFormerCountryAddress2" >
@@ -1991,9 +2149,10 @@ export function Counter() {
                                         type="text"
                                         value={state.appFormerCountryAddress2}
                                         onChange={handleChange}
-                                        className="inputappFormerCountryAddress2"
+                                        onBlur={handleBlur}
+                                        className={errors.appFormerCountryAddress2 ? 'error' : ''}
                                     />
-
+                                    {errors.appFormerCountryAddress2 && <span style={{ color: 'red' }}> {errors.appFormerCountryAddress2}</span>}
                                 </Col>
 
                             </FormGroup>
@@ -2012,8 +2171,10 @@ export function Counter() {
                                         placeholder="MM / YY"
                                         type="text"
                                         onChange={handleChange}
-                                        className="inputappMoveInDate2"
+                                        onBlur={handleBlur}
+                                        className={errors.appMoveInDate2 ? 'error' : ''}
                                     />
+                                    {errors.appMoveInDate2 && <span style={{ color: 'red' }}> {errors.appMoveInDate2}</span>}
 
                                 </Col>
                                 <Col md={3}>
@@ -2030,9 +2191,10 @@ export function Counter() {
                                         placeholder="MM / YY"
                                         type="text"
                                         onChange={handleChange}
-                                        className="inputappFormerMoveOutDate2"
+                                        onBlur={handleBlur}
+                                        className={errors.appFormerMoveOutDate2 ? 'error' : ''}
                                     />
-
+                                    {errors.appFormerMoveOutDate2 && <span style={{ color: 'red' }}> {errors.appFormerMoveOutDate2}</span>}
                                 </Col>
 
                                 <Col md={3}>
@@ -2046,8 +2208,10 @@ export function Counter() {
                                         type="text"
                                         value={state.FormerHousingProviderName2}
                                         onChange={handleChange}
-                                        className="inputFormerHousingProviderName2"
+                                        onBlur={handleBlur}
+                                        className={errors.FormerHousingProviderName2 ? 'error' : ''}
                                     />
+                                    {errors.FormerHousingProviderName2 && <span style={{ color: 'red' }}> {errors.FormerHousingProviderName2}</span>}
                                 </Col>
                                 <Col md={3}>
                                     <Label for="HousingProviderEmail2" className="FormerHousingProviderEmail2" >
@@ -2060,8 +2224,10 @@ export function Counter() {
                                         type="email"
                                         value={state.FormerHousingProviderEmail2}
                                         onChange={handleChange}
-                                        className="inputFormerHousingProviderEmail2"
+                                        onBlur={handleBlur}
+                                        className={errors.id = "FormerHousingProviderEmail2" ? 'error' : ''}
                                     />
+                                    {errors.FormerHousingProviderEmail2 && <span style={{ color: 'red' }}> {errors.FormerHousingProviderEmail2}</span>}
                                 </Col>
                             </FormGroup>
                             {!showAddress2 &&
@@ -2077,7 +2243,7 @@ export function Counter() {
 
                     <div>
                         <div>
-                            <p className="AddFormerAddress1" onClick={addFAddress2}>- Delete address</p>
+                            <p className="AddFormerAddress2" onClick={addFAddress2}>- Delete address</p>
                             <p className="appFormerAddress3"><strong>Former Address 3</strong></p>
                             <Input
                                 id="appFormerAddress3"
@@ -2086,8 +2252,10 @@ export function Counter() {
                                 placeholder="with a placeholder"
                                 type="text"
                                 //onChange={handleChange}
-                                className="inputappFormerAddress3"
+                                onBlur={handleBlur}
+                                className={errors.id = "appFormerAddress3" ? 'error' : ''}
                             />
+                            {errors.appFormerAddress3 && <span style={{ color: 'red' }}> {errors.appFormerAddress3}</span>}
                             <br />
                             <FormGroup row>
 
@@ -2102,9 +2270,10 @@ export function Counter() {
                                         type="text"
                                         value={state.appFormerStreetAddress3}
                                         onChange={handleChange}
-                                        className="inputappFormerStreetAddress3"
+                                        onBlur={handleBlur}
+                                        className={errors.id = "appFormerStreetAddress3" ? 'error' : ''}
                                     />
-
+                                    {errors.appFormerStreetAddress3 && <span style={{ color: 'red' }}> {errors.appFormerStreetAddress3}</span>}
 
                                 </Col>
 
@@ -2119,10 +2288,10 @@ export function Counter() {
                                         type="text"
                                         onChange={handleChange}
                                         value={state.appFormerCityAddress3}
-
-                                        className="inputappFormerCityAddress3"
+                                        onBlur={handleBlur}
+                                        className={errors.id = "appFormerCityAddress3" ? 'error' : ''}
                                     />
-
+                                    {errors.appFormerCityAddress3 && <span style={{ color: 'red' }}> {errors.appFormerCityAddress3}</span>}
 
                                 </Col>
 
@@ -2136,12 +2305,13 @@ export function Counter() {
                                         name="appFormerProvinceState3"
                                         placeholder=""
                                         type="text"
-                                        value={state.appFormerProvinceState1}
+                                        value={state.appFormerProvinceState3}
                                         onChange={handleChange}
-                                        className="inputappFormerProvinceState3"
+                                        onBlur={handleBlur}
+                                        className={errors.id = "appFormerProvinceState3" ? 'error' : ''}
                                     />
 
-
+                                    {errors.appFormerProvinceState3 && <span style={{ color: 'red' }}> {errors.appFormerProvinceState3}</span>}
                                 </Col>
                                 <Col md={2}>
                                     <Label for="appFormerPostalStateAddress3" className="appFormerPostalStateAddress3" >
